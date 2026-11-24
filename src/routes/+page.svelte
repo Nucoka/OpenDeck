@@ -2,6 +2,7 @@
 	import type { DeviceInfo } from "$lib/DeviceInfo";
 	import type { Profile } from "$lib/Profile";
 
+	import { t } from "$lib/i18n";
 	import { initPortBase } from "$lib/ports";
 	import { inspectedParentAction } from "$lib/propertyInspector";
 	import { actionList, deviceSelector, profileManager } from "$lib/singletons";
@@ -11,6 +12,7 @@
 	import DeviceView from "../components/DeviceView.svelte";
 	import NoDevicesDetected from "../components/NoDevicesDetected.svelte";
 	import ParentActionView from "../components/ParentActionView.svelte";
+	import PhotoWall from "../components/PhotoWall.svelte";
 	import PluginManager from "../components/PluginManager.svelte";
 	import ProfileManager from "../components/ProfileManager.svelte";
 	import PropertyInspectorView from "../components/PropertyInspectorView.svelte";
@@ -19,6 +21,7 @@
 	let devices: { [id: string]: DeviceInfo } = {};
 	let selectedDevice: string;
 	let selectedProfiles: { [id: string]: Profile } = {};
+	let showPhotoWall = false;
 
 	initPortBase();
 </script>
@@ -38,6 +41,15 @@
 			</div>
 
 			<div class="flex flex-row items-center space-x-2" class:mr-4={Object.keys(devices).length > 0}>
+				{#if selectedDevice && devices[selectedDevice] && selectedProfiles[selectedDevice]}
+					<button
+						class="px-3 py-1 text-sm text-neutral-300 bg-neutral-700 hover:bg-neutral-600 transition-colors border border-neutral-600 rounded-lg"
+						on:click={() => (showPhotoWall = true)}
+					>
+						{$t("photo_wall.button")}
+					</button>
+					<PhotoWall bind:show={showPhotoWall} bind:profile={selectedProfiles[selectedDevice]} device={devices[selectedDevice]} />
+				{/if}
 				<PluginManager />
 				<SettingsView />
 			</div>

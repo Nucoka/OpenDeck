@@ -1,9 +1,18 @@
-# OpenDeck
+# OpenDeck (fork)
 
-Linux software for your Elgato Stream Deck
+This is a fork of [nekename/OpenDeck](https://github.com/nekename/OpenDeck).
+
+Differences from upstream:
+
+- **Photo wall**: one image spread across the button grid of the current device, with a preview, Cover/Fit modes, a gap setting, and reset.
+
+This fork is built from source only; no release artifacts are published here.
 
 ![Main menu](.github/readme/mainmenu.png)
 [More screenshots](#showcase)
+
+> [!NOTE]
+> Screenshots are still from the original project and will be updated.
 
 OpenDeck is a desktop application for using stream controller devices like the Elgato Stream Deck on Linux, Windows, and macOS. OpenDeck supports plugins made for the original Stream Deck SDK, allowing many plugins made for the Elgato software ecosystem to be used, or the [OpenAction](https://openaction.amankhanna.me/) API.
 
@@ -12,9 +21,7 @@ Only Elgato hardware is officially supported, but plugins are available for supp
 > [!TIP]
 > No Stream Deck in front of you? Use OpenDeck with [Tacto](https://tacto.live/) to turn any smartphone into one!
 
-If you would like to support development of OpenDeck, consider sponsoring me on [GitHub Sponsors](https://github.com/sponsors/nekename), [Ko-fi](https://ko-fi.com/nekename) or [Liberapay](https://liberapay.com/nekename)! Considering that the power of your Stream Deck comes from the software you use with it, just $5 (only 2.5% of the cost of a Stream Deck+) goes a long way.
-
-Special thanks go to the developers of [Tauri](https://github.com/tauri-apps/tauri), the [elgato-streamdeck](https://github.com/OpenActionAPI/rust-elgato-streamdeck) Rust library, and [Phosphor Icons](https://phosphoricons.com/).
+Special thanks to [nekename](https://github.com/nekename) for creating OpenDeck, and to the developers of [Tauri](https://github.com/tauri-apps/tauri), the [elgato-streamdeck](https://github.com/OpenActionAPI/rust-elgato-streamdeck) Rust library, and [Phosphor Icons](https://phosphoricons.com/).
 
 ### Why use OpenDeck?
 
@@ -24,43 +31,13 @@ Special thanks go to the developers of [Tauri](https://github.com/tauri-apps/tau
 - **Open source**: OpenDeck source code is licensed under the GNU General Public License, allowing anyone to view it and improve it for feature, stability, privacy or security reasons. [Most plugins are open-source, too.](https://marketplace.rivul.us/)
 - **Written in Rust**: The Rust programming language, which OpenDeck is built with alongside TypeScript, is known for its performance, safety and resulting code quality.
 
-## Installation
+## Photo wall
 
-### Linux
+Open the photo wall from the button in the top bar next to Settings. Choose an image or drop it onto the picker, then adjust the mode, gap, background colour (used by Fit), and label visibility. The preview shows how the image will be cut into the current device's button grid, with outlines marking individual buttons.
 
-> [!TIP]
-> If you're using a Debian, Ubuntu, Fedora, Fedora Atomic, openSUSE or Arch-based distribution, you can try the automated installation script:
->
-> ```bash
-> curl -sSL https://raw.githubusercontent.com/nekename/OpenDeck/main/install_opendeck.sh | bash
-> ```
->
-> The script installs OpenDeck from a released .deb or .rpm file, the AUR, or Flathub, appropriately, and also installs and reloads the appropriate udev subsystem rules. Additionally, you can choose to install Wine and/or Node.js from your distribution during the process.
+Press Apply to write each piece to its button in order; progress is shown in the dialog. Cancel stops after the current button. Empty buttons receive a no-op tile action so the image stays continuous. Reset removes those tiles and restores the previous images, settings, and active states.
 
-- Download the latest release from [GitHub Releases](https://github.com/nekename/OpenDeck/releases/latest).
-  - You should avoid AppImage releases of OpenDeck as they tend to have problems (you should also just avoid AppImages in general).
-  - For users of Arch-based distributions, there is the `opendeck` package in the `extra` repo for the latest release, as well as the `opendeck-git` AUR package for the latest commit on the `main` branch of this repository.
-- Install OpenDeck using your package manager of choice.
-- Install the appropriate udev subsystem rules from [here](https://raw.githubusercontent.com/OpenActionAPI/rust-elgato-streamdeck/main/40-streamdeck.rules):
-  - If you're using a `.deb` or `.rpm` release artifact, this file should be installed automatically.
-  - Otherwise, download and copy it to the correct location with `sudo cp 40-streamdeck.rules /etc/udev/rules.d/`.
-  - In both cases, you will need to reload your udev subsystem rules with `sudo udevadm control --reload-rules && sudo udevadm trigger`.
-- If you intend to use some compiled plugins that are not compiled for Linux, you will need to have [Wine](https://www.winehq.org/) installed on your system. Some plugins may also depend on Wine Mono (which is sometimes, but not always included, in your distro's packaging of Wine).
-
-> [!NOTE]
-> If Flatpak is your only option, OpenDeck is [available from Flathub](https://flathub.org/apps/me.amankhanna.opendeck). Please note that you still need to install the udev subsystem rules as described above. To use Windows and Node.js plugins, you should have Wine or Node.js, respectively, installed natively (the Wine and Node.js Flatpaks are not supported).
-
-### Windows
-
-- Download the latest release (`.exe` or `.msi`) from [GitHub Releases](https://github.com/nekename/OpenDeck/releases/latest).
-- Double-click the downloaded file to run the installer.
-
-### macOS
-
-- Download the latest release from [GitHub Releases](https://github.com/nekename/OpenDeck/releases/latest).
-- If you downloaded a `.dmg`, open the downloaded disk image and drag the application inside into your Applications folder; otherwise, extract the `.tar.gz` to your Applications folder.
-- Open the installed application. Note: if you receive a warning about OpenDeck being distributed by an unknown developer, _right-click the app in Finder and then click Open_ to suppress the warning.
-- If you intend to use plugins that are only compiled for Windows, you will need to have [Wine](https://www.winehq.org/) installed on your system.
+Reset works only until the application is restarted: the previous state is kept in memory only. After a restart, restore the profile manually from a backup.
 
 ## Support
 
@@ -95,7 +72,7 @@ To change other options, open Settings. From here, you can also view information
 - [Matrix](https://matrix.to/#/#opendeck:matrix.org)
 - [GitHub Issues](https://github.com/nekename/OpenDeck/issues)
 
-### Building from source / contributing
+## Building from source
 
 > [!TIP]
 > The development guide for agents present in [AGENTS.md](AGENTS.md) also serves as a useful introduction to the codebase for humans.
@@ -111,6 +88,8 @@ Before each commit, please ensure that all of the following are completed:
 5. Frontend code has been formatted using `deno task format`
 
 When submitting contributions, please adhere to the [Conventional Commits specification](https://conventionalcommits.org/) for commit messages. You will also need to [sign your commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits). Feel free to reach out on the support channels above for guidance when contributing!
+
+## License
 
 OpenDeck is licensed under the GNU General Public License version 3.0 or later. For more details, see the LICENSE.md file.
 

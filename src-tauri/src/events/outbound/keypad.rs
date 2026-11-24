@@ -35,7 +35,9 @@ pub async fn key_down(device: &str, key: u8) -> Result<(), anyhow::Error> {
 	KEY_DOWN_TARGETS.insert((device.to_owned(), key), context.clone());
 
 	let Some(instance) = get_slot_mut(&context, &mut locks).await? else { return Ok(()) };
-	if instance.action.uuid == "opendeck.multiaction" {
+	if instance.action.uuid == "opendeck.photowalltile" {
+		return Ok(());
+	} else if instance.action.uuid == "opendeck.multiaction" {
 		let children = instance.children.clone().unwrap_or_default();
 		let delays: Vec<u64> = instance
 			.settings
@@ -151,7 +153,9 @@ pub async fn key_up(device: &str, key: u8) -> Result<(), anyhow::Error> {
 	let slot = get_slot_mut(&context, &mut locks).await?;
 	let Some(instance) = slot else { return Ok(()) };
 
-	if instance.action.uuid == "opendeck.toggleaction" {
+	if instance.action.uuid == "opendeck.photowalltile" {
+		return Ok(());
+	} else if instance.action.uuid == "opendeck.toggleaction" {
 		let index = instance.current_state as usize;
 		let children = instance.children.as_ref().unwrap();
 		if children.is_empty() {

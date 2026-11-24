@@ -42,7 +42,9 @@ src-tauri/src/              # Rust backend
 
 src/                        # SvelteKit frontend
 ├── lib/                    # TypeScript types mirroring Rust structs
+├── lib/photoWall.ts        # Canvas slicing for Photo wall (Cover/Fit, gap, JPEG tiles)
 ├── components/             # Svelte UI components
+├── components/PhotoWall.svelte  # Photo wall picker, preview, apply and reset UI
 └── routes/                 # SvelteKit routing (currently single-page app)
 
 plugins/com.amansprojects.starterpack.sdPlugin/  # Plugin with basic actions
@@ -106,6 +108,10 @@ An `ActionContext` extends this with an action instance index for nested actions
 - **Flatpak**: Special handling for paths (`is_flatpak()` checks), Wine must be installed natively
 
 ## Common Patterns
+
+Photo wall internals:
+- `photo_wall_apply_tile` in `events/frontend/instances.rs` writes one sliced tile into a key and creates the internal action on empty slots.
+- `opendeck.photowalltile` is a hidden no-op built-in action; `get_categories` filters it out of the user action list.
 
 ### Adding a New Tauri Command
 

@@ -172,6 +172,8 @@ async fn init(device: AsyncStreamDeck, device_id: String) {
 				encoders: kind.encoder_count(),
 				touchpoints: kind.touchpoint_count(),
 				infobars: if kind == Kind::Neo { 1 } else { 0 },
+				key_width: kind.key_image_format().size.0 as u16,
+				key_height: kind.key_image_format().size.1 as u16,
 				r#type: device_type,
 			},
 		},

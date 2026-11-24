@@ -237,11 +237,73 @@ pub async fn update_state(app: &AppHandle, context: ActionContext, locks: &mut L
 #[command]
 pub async fn set_state(context: ActionContext, index: u16, state: ActionState) -> Result<(), Error> {
 	let mut locks = acquire_locks_mut().await;
-	let reference = get_instance_mut(&context, &mut locks).await?.unwrap();
+	let Some(reference) = get_instance_mut(&context, &mut locks).await? else {
+		return Err(anyhow::anyhow!("No action instance for {}", context).into());
+	};
+	if index as usize >= reference.states.len() {
+		return Err(anyhow::anyhow!("State {} does not exist for {}", index, context).into());
+	}
 	reference.states[index as usize] = state;
 	let clone = reference.clone();
 	save_profile_now(&context.device, &mut locks).await?;
 	crate::events::outbound::states::title_parameters_did_change(&clone, index).await?;
+	Ok(())
+}
+
+#[command]
+pub async fn set_current_state(app: AppHandle, context: ActionContext, current_state: u16) -> Result<(), Error> {
+	let mut locks = acquire_locks_mut().await;
+	let Some(instance) = get_instance_mut(&context, &mut locks).await? else {
+		return Err(anyhow::anyhow!("No action instance for {}", context).into());
+	};
+	if current_state as usize >= instance.states.len() {
+		return Err(anyhow::anyhow!("State {} does not exist for {}", current_state, context).into());
+	}
+	instance.current_state = current_state;
+	save_profile_now(&context.device, &mut locks).await?;
+	update_state(&app, context, &mut locks).await?;
+	Ok(())
+}
+
+#[command]
+pub async fn photo_wall_apply_tile(app: AppHandle, context: Context, states: Vec<ActionState>, create_if_empty: bool) -> Result<(), Error> {
+	if states.is_empty() {
+		return Err(anyhow::anyhow!("Photo wall tile requires at least one state").into());
+	}
+
+	let action = {
+		let categories = crate::shared::CATEGORIES.read().await;
+		let Some(category) = categories.get(crate::shared::PRODUCT_NAME) else {
+			return Err(anyhow::anyhow!("Photo wall tile action is not registered").into());
+		};
+		let Some(action) = category.actions.iter().find(|action| action.uuid == "opendeck.photowalltile") else {
+			return Err(anyhow::anyhow!("Photo wall tile action is not registered").into());
+		};
+		action.clone()
+	};
+
+	let mut locks = acquire_locks_mut().await;
+	let slot = get_slot_mut(&context, &mut locks).await?;
+	if slot.is_none() {
+		if !create_if_empty {
+			return Err(anyhow::anyhow!("{} at position {} has no action", context.controller, context.position).into());
+		}
+		*slot = Some(ActionInstance {
+			action,
+			context: ActionContext::from_context(context.clone(), 0),
+			states: states.clone(),
+			current_state: 0,
+			settings: serde_json::Value::Object(serde_json::Map::new()),
+			children: None,
+		});
+	}
+	let instance = slot.as_mut().ok_or_else(|| anyhow::anyhow!("Failed to create photo wall tile at position {}", context.position))?;
+	instance.states = states;
+	instance.current_state = 0;
+	let instance_context = instance.context.clone();
+
+	save_profile_now(&context.device, &mut locks).await?;
+	update_state(&app, instance_context, &mut locks).await?;
 	Ok(())
 }
 

@@ -42,6 +42,11 @@ pub struct DeviceInfo {
 	pub touchpoints: u8,
 	#[serde_inline_default(0)]
 	pub infobars: u8,
+	// Native key image size; zero for plugin devices that do not report one.
+	#[serde_inline_default(0)]
+	pub key_width: u16,
+	#[serde_inline_default(0)]
+	pub key_height: u16,
 	pub r#type: u8,
 }
 
@@ -491,6 +496,20 @@ pub static CATEGORIES: LazyLock<RwLock<HashMap<String, Category>>> = LazyLock::n
 						"controllers": [ "Keypad" ],
 						"states": [ { "image": "opendeck/toggle-action.png" } ],
 						"supported_in_multi_actions": false
+					}
+				))
+				.unwrap(),
+				serde_json::from_value(serde_json::json!(
+					{
+						"name": "Photo Wall Tile",
+						"icon": "opendeck/transparent.png",
+						"plugin": "opendeck",
+						"uuid": "opendeck.photowalltile",
+						"tooltip": "Photo wall tile",
+						"controllers": [ "Keypad" ],
+						"states": [ { "image": "opendeck/transparent.png" } ],
+						"supported_in_multi_actions": false,
+						"visible_in_action_list": false
 					}
 				))
 				.unwrap(),

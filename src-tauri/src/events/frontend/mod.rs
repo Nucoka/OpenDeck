@@ -70,7 +70,12 @@ pub async fn get_port_base() -> u16 {
 
 #[command]
 pub async fn get_categories() -> HashMap<String, Category> {
-	CATEGORIES.read().await.clone()
+	let mut categories = CATEGORIES.read().await.clone();
+	// Photo wall tiles are created internally and must not appear in the user's action list.
+	for category in categories.values_mut() {
+		category.actions.retain(|action| action.uuid != "opendeck.photowalltile");
+	}
+	categories
 }
 
 #[command]

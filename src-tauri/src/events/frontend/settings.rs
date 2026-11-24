@@ -70,7 +70,7 @@ pub fn get_build_info() -> String {
 	)
 }
 
-fn add_dir_to_zip<W: Write + std::io::Seek>(zip: &mut ZipWriter<W>, base_dir: &Path, current_dir: &Path, options: FileOptions<()>, skip_paths: &[PathBuf]) -> std::io::Result<()> {
+pub(crate) fn add_dir_to_zip<W: Write + std::io::Seek>(zip: &mut ZipWriter<W>, base_dir: &Path, current_dir: &Path, options: FileOptions<()>, skip_paths: &[PathBuf]) -> std::io::Result<()> {
 	for entry in read_dir(current_dir)? {
 		let entry = entry?;
 		let path = entry.path();

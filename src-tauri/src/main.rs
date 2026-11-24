@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod application_watcher;
+mod backup;
 mod device_sleep;
 mod elgato;
 mod encoder_layouts;
@@ -83,6 +84,8 @@ async fn main() {
 			frontend::instances::move_instance,
 			frontend::instances::remove_instance,
 			frontend::instances::set_state,
+			frontend::instances::set_current_state,
+			frontend::instances::photo_wall_apply_tile,
 			frontend::instances::set_child_delay,
 			frontend::instances::update_image,
 			frontend::instances::trigger_virtual_press,
@@ -122,6 +125,10 @@ async fn main() {
 			let old = app.path().config_dir().unwrap().join("com.amansprojects.opendeck");
 			if old.exists() {
 				let _ = std::fs::rename(old, app.path().app_config_dir().unwrap());
+			}
+
+			if let Err(error) = backup::create_startup_backup() {
+				log::warn!("Failed to back up configuration: {error}");
 			}
 
 			let mut settings = store::get_settings();
