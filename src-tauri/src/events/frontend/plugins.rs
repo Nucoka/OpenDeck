@@ -19,6 +19,8 @@ pub struct PluginInfo {
 	has_settings_interface: bool,
 	builtin: bool,
 	registered: bool,
+	auto_restart: bool,
+	status: String,
 }
 
 #[command]
@@ -55,6 +57,8 @@ pub async fn list_plugins(app: AppHandle) -> Result<Vec<PluginInfo>, Error> {
 				has_settings_interface: manifest.has_settings_interface.unwrap_or(false),
 				builtin: builtins.contains(&id),
 				registered: registered.contains(&id),
+				auto_restart: crate::plugins::watchdog::auto_restart_enabled(&id),
+				status: crate::plugins::watchdog::get_status(&id).status,
 				id,
 			});
 		}
@@ -178,4 +182,14 @@ pub async fn reload_plugin(app: AppHandle, id: String) {
 pub async fn show_settings_interface(plugin: String) -> Result<(), Error> {
 	crate::events::outbound::settings::show_settings_interface(&plugin).await?;
 	Ok(())
+}
+
+#[command]
+pub async fn restart_plugin(id: String) {
+	crate::plugins::watchdog::restart(&id, true).await;
+}
+
+#[command]
+pub async fn set_plugin_auto_restart(id: String, enabled: bool) {
+	crate::plugins::watchdog::set_auto_restart(&id, enabled);
 }

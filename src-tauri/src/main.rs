@@ -101,6 +101,8 @@ async fn main() {
 			frontend::plugins::install_plugin,
 			frontend::plugins::remove_plugin,
 			frontend::plugins::reload_plugin,
+			frontend::plugins::restart_plugin,
+			frontend::plugins::set_plugin_auto_restart,
 			frontend::plugins::show_settings_interface,
 			frontend::settings::get_settings,
 			frontend::settings::set_settings,
@@ -398,6 +400,7 @@ If you have already donated, thank you so much for your support!"#,
 
 	app.run(|app, event| {
 		if let tauri::RunEvent::Exit = event {
+			plugins::watchdog::SHUTDOWN.store(true, std::sync::atomic::Ordering::Relaxed);
 			futures::executor::block_on(async {
 				let device_ids = shared::DEVICES.iter().filter(|entry| !entry.id.starts_with("sd-")).map(|entry| entry.id.clone()).collect::<Vec<_>>();
 				for id in device_ids {

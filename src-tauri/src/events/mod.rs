@@ -22,6 +22,10 @@ pub async fn registered_plugins() -> Vec<String> {
 	PLUGIN_SOCKETS.lock().await.keys().map(|x| x.to_owned()).collect()
 }
 
+pub async fn clear_plugin_queue(uuid: &str) {
+	PLUGIN_QUEUES.write().await.remove(uuid);
+}
+
 /// Register a plugin or property inspector to send and receive events with its WebSocket.
 pub async fn register_plugin(event: RegisterEvent, stream: WebSocketStream<TcpStream>) {
 	let (mut read, write) = stream.split();

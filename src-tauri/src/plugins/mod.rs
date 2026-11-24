@@ -1,5 +1,6 @@
 pub mod info_param;
 pub mod manifest;
+pub(crate) mod watchdog;
 mod webserver;
 
 use crate::APP_HANDLE;
@@ -26,15 +27,24 @@ pub enum PluginChildType {
 	Node,
 }
 
-enum PluginInstance {
+pub(crate) enum PluginInstance {
 	Webview,
 	Wine(Child),
 	Native(Child),
 	Node(Child),
 }
 
+impl PluginInstance {
+	pub(crate) fn child_mut(&mut self) -> Option<&mut Child> {
+		match self {
+			Self::Wine(child) | Self::Native(child) | Self::Node(child) => Some(child),
+			Self::Webview => None,
+		}
+	}
+}
+
 pub static DEVICE_NAMESPACES: LazyLock<RwLock<HashMap<String, String>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
-static INSTANCES: LazyLock<Mutex<HashMap<String, PluginInstance>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
+pub(crate) static INSTANCES: LazyLock<Mutex<HashMap<String, PluginInstance>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
 
 pub static PORT_BASE: LazyLock<u16> = LazyLock::new(|| {
 	let mut base = 57116;
@@ -380,8 +390,8 @@ pub async fn deactivate_plugin(app: &AppHandle, uuid: &str) -> Result<(), anyhow
 				}
 			}
 			PluginInstance::Node(mut child) | PluginInstance::Wine(mut child) | PluginInstance::Native(mut child) => {
-				child.kill()?;
-				child.wait()?;
+				let _ = child.kill();
+				let _ = child.wait();
 			}
 		}
 		Ok(())
@@ -459,6 +469,7 @@ pub fn initialise_plugins() {
 			match f() {
 				Ok((plugin_uuid, child_type, mut command)) => match command.spawn() {
 					Ok(child) => {
+						let monitored_uuid = plugin_uuid.clone();
 						INSTANCES.blocking_lock().insert(
 							plugin_uuid,
 							match child_type {
@@ -467,6 +478,7 @@ pub fn initialise_plugins() {
 								PluginChildType::Node => PluginInstance::Node(child),
 							},
 						);
+						watchdog::on_spawn(&monitored_uuid);
 					}
 					Err(error) => warn!("Failed to initialise plugin {}: {}", plugin_uuid, error),
 				},
@@ -474,6 +486,8 @@ pub fn initialise_plugins() {
 			}
 		}
 	});
+
+	watchdog::start_monitor();
 
 	// Iterate through all directory entries in the plugins folder and initialise them as plugins if appropriate
 	for entry in entries {
