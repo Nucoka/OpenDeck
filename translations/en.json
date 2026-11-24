@@ -64,6 +64,7 @@
 	"photo_wall.preview": "Preview",
 	"photo_wall.progress": "{{n}} of {{total}}",
 	"photo_wall.reset": "Reset",
+	"photo_wall.screen_columns": "Columns with screens",
 	"photo_wall.reset.mismatch": "Cannot reset: the device or profile has changed since the photo wall was applied.",
 	"photo_wall.reset.warning": "Reset is unavailable after restarting the application.",
 	"photo_wall.title": "Photo wall",

@@ -46,6 +46,7 @@
 	let gap = 0;
 	let background = "#000000";
 	let hideText = true;
+	let screenColumns = device.columns;
 	let error = "";
 	let limit: number | undefined;
 	let applying = false;
@@ -60,7 +61,8 @@
 
 	$: tileWidth = device.key_width || 144;
 	$: tileHeight = device.key_height || 144;
-	$: params = { image, mode, gap, background, columns: device.columns, rows: device.rows, tileWidth, tileHeight };
+	$: columnsWithScreens = Math.max(1, Math.min(screenColumns, device.columns));
+	$: params = { image, mode, gap, background, columns: columnsWithScreens, rows: device.rows, tileWidth, tileHeight };
 	$: if (params.image && previewCanvas) scheduleRender(params);
 
 	onDestroy(() => {
@@ -127,7 +129,7 @@
 	async function apply() {
 		if (!image || !profile || applying) return;
 
-		const { tiles } = slicePhoto(image, { columns: device.columns, rows: device.rows, tileWidth, tileHeight, mode, gap, background });
+		const { tiles } = slicePhoto(image, { columns: columnsWithScreens, rows: device.rows, tileWidth, tileHeight, mode, gap, background });
 		total = isDev && limit && limit > 0 ? Math.min(limit, tiles.length) : tiles.length;
 		error = "";
 		snapshot = [];
@@ -310,6 +312,12 @@
 		</div>
 
 		<div class="flex flex-row items-center space-x-2">
+			<label for="photo-wall-columns" class="text-neutral-400">{$t("photo_wall.screen_columns")}:</label>
+			<input type="range" min="1" max={device.columns} bind:value={screenColumns} id="photo-wall-columns" />
+			<span class="w-8 text-sm text-neutral-300 tabular-nums">{columnsWithScreens}</span>
+		</div>
+
+		<div class="flex flex-row items-center space-x-2">
 			<label for="photo-wall-gap" class="text-neutral-400">{$t("photo_wall.gap")}:</label>
 			<input type="range" min="0" max="80" bind:value={gap} id="photo-wall-gap" />
 			<span class="w-8 text-sm text-neutral-300 tabular-nums">{gap}</span>
@@ -333,7 +341,7 @@
 				<input
 					type="number"
 					min="1"
-					max={device.rows * device.columns}
+					max={device.rows * columnsWithScreens}
 					bind:value={limit}
 					class="w-16 px-1 text-neutral-300 border border-neutral-600 rounded-lg"
 					id="photo-wall-limit"
