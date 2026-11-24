@@ -24,7 +24,7 @@
 				<span
 					class="rounded border border-app-border px-1 text-xs"
 					class:text-app-success={status === "running"}
-					class:text-yellow-400={status === "crashed" || status === "restarting"}
+					class:text-app-warning={status === "crashed" || status === "restarting"}
 					class:text-app-danger={status === "failed"}
 					title={$t(`plugin_manager.status.${status}`)}
 				>

@@ -326,6 +326,7 @@
 				class:border-app-accent={pluginFilter === filter}
 				class:text-app-accent={pluginFilter === filter}
 				on:click={() => (pluginFilter = filter)}
+				aria-pressed={pluginFilter === filter}
 			>
 				{$t(`plugin_manager.filter.${filter}`)}
 			</button>
@@ -357,7 +358,7 @@
 					<span class="font-mono">{plugin.version}</span>
 					{#if plugin.author}<span class="text-app-muted"> · {plugin.author}</span>{/if}
 					{#if availableUpdates[plugin.id]}
-						(<span class="text-yellow-400">
+						(<span class="text-app-warning">
 							{$t("plugin_manager.available")}
 							<button class="font-semibold underline" on:click={() => (openDetailsView = plugin.id.endsWith(".sdPlugin") ? plugin.id.slice(0, -9) : plugin.id)}>
 								{availableUpdates[plugin.id]}
@@ -368,7 +369,7 @@
 
 				<svelte:fragment slot="secondary">
 					{#if !plugin.registered}
-						<WarningCircle size={16} class="text-yellow-500" />
+						<WarningCircle size={16} class="text-app-warning" />
 					{:else if plugin.has_settings_interface}
 						<Gear size={16} class="text-app-success" />
 					{/if}
@@ -411,8 +412,8 @@
 	</div>
 
 	<div class="flex flex-row items-center mx-2 my-4 p-3 space-x-2 bg-yellow-900/20 border-l-4 border-yellow-500 rounded">
-		<WarningCircle size="20" class="mt-0.5 text-yellow-500" />
-		<div class="text-sm text-yellow-200">
+		<WarningCircle size="20" class="mt-0.5 text-app-warning" />
+		<div class="text-sm text-app-warning-soft">
 			{$t("plugin_manager.warning", { PRODUCT_NAME })}
 		</div>
 	</div>
@@ -438,7 +439,7 @@
 						<span>
 							{plugin.author}
 							{#if plugin.flags?.ai_assisted}
-								<Robot size="1em" class="inline align-text-bottom text-yellow-500" />
+								<Robot size="1em" class="inline align-text-bottom text-app-warning" />
 							{/if}
 						</span>
 					</svelte:fragment>

@@ -35,4 +35,10 @@ Done: main area is now three columns - a narrow action library (existing `Action
 
 Not verified: no GUI run; selected-instance lookup handles full ActionContext strings from `$inspectedInstance` but empty-slot selections store a Context object and intentionally show the empty state. The inspector may render both the Key's floating editor and the inline editor if a user right-clicks a selected button; both remain functional.
 
-## Step 5 - pending
+## Step 5 - Plugins screen token pass
+
+Done: plugin cards already matched the mockup structure from the earlier redesign pass (icon, name, author, mono version, description from localisations, status badge with exit code, Restart / Settings-or-logs / Uninstall, Auto-restart, search and All/Installed/Running/Crashed chips). This step replaces remaining hard-coded yellow shades with `app-warning` / `app-warning-soft` tokens and adds `aria-pressed` to the filter chips. No new data field was invented: Updates, Disable/Enable, Open plugin folder and a fake error line remain absent.
+
+Not verified: no GUI run; card wrapping and badge contrast were checked in source only.
+
+## Step 6 - pending
