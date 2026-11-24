@@ -1,10 +1,11 @@
 <script lang="ts">
+	import type { ActionInstance } from "$lib/ActionInstance";
 	import type { DeviceInfo } from "$lib/DeviceInfo";
 	import type { Profile } from "$lib/Profile";
 
 	import { t } from "$lib/i18n";
 	import { initPortBase } from "$lib/ports";
-	import { inspectedParentAction } from "$lib/propertyInspector";
+	import { inspectedInstance, inspectedParentAction } from "$lib/propertyInspector";
 	import { settings } from "$lib/settings";
 	import { actionList, deviceSelector, profileManager } from "$lib/singletons";
 
@@ -18,6 +19,7 @@
 	import ActionList from "../components/ActionList.svelte";
 	import DeviceSelector from "../components/DeviceSelector.svelte";
 	import DeviceView from "../components/DeviceView.svelte";
+	import InstanceEditor from "../components/InstanceEditor.svelte";
 	import NoDevicesDetected from "../components/NoDevicesDetected.svelte";
 	import ParentActionView from "../components/ParentActionView.svelte";
 	import PhotoWall from "../components/PhotoWall.svelte";
@@ -30,6 +32,22 @@
 	let selectedDevice: string;
 	let selectedProfiles: { [id: string]: Profile } = {};
 	let showPhotoWall = false;
+	let inspectorTab: "appearance" | "action" = "appearance";
+
+	$: selectedInstance = ((): ActionInstance | null => {
+		const context = typeof $inspectedInstance === "string" ? $inspectedInstance : null;
+		const profile = selectedProfiles[selectedDevice];
+		if (!context || !profile) return null;
+		for (const list of [profile.keys, profile.sliders, profile.infobars]) {
+			for (const instance of list) {
+				if (instance?.context === context) return instance;
+				for (const child of instance?.children ?? []) {
+					if (child.context === context) return child;
+				}
+			}
+		}
+		return null;
+	})();
 
 	initPortBase();
 </script>
@@ -54,11 +72,7 @@
 			</div>
 			<div class="side-row">
 				<UserCircle size={20} />
-				{#key selectedDevice}
-					{#if selectedDevice && devices[selectedDevice]}
-						<ProfileManager bind:device={devices[selectedDevice]} bind:profile={selectedProfiles[selectedDevice]} bind:this={$profileManager} />
-					{/if}
-				{/key}
+				<span>{$t("profile_manager.label")}</span>
 			</div>
 			<div class="side-row">
 				<Gear size={20} />
@@ -69,7 +83,13 @@
 
 	<div class="flex min-w-0 grow flex-col">
 		<header class="grid h-14 shrink-0 grid-cols-3 items-center border-b border-app-border bg-app-bg px-6" class:hidden={$inspectedParentAction}>
-			<div aria-hidden="true"></div>
+			<div class="flex items-center gap-2">
+				{#key selectedDevice}
+					{#if selectedDevice && devices[selectedDevice]}
+						<ProfileManager bind:device={devices[selectedDevice]} bind:profile={selectedProfiles[selectedDevice]} bind:this={$profileManager} />
+					{/if}
+				{/key}
+			</div>
 
 			<div class="flex items-center justify-center gap-2">
 				<span
@@ -98,26 +118,61 @@
 			</div>
 		</header>
 
-		<main class="min-h-0 grow">
-			{#if Object.keys(devices).length > 0 && selectedProfiles}
-				{#if $inspectedParentAction}
-					<ParentActionView bind:profile={selectedProfiles[selectedDevice]} />
-				{/if}
+		<main class="flex min-h-0 grow">
+			<aside class="w-56 shrink-0 overflow-hidden border-r border-app-border bg-app-panel">
+				<ActionList bind:this={$actionList} />
+			</aside>
 
-				{#each Object.entries(devices) as [id, device]}
-					{#if device && selectedProfiles[id]}
-						<DeviceView bind:device bind:profile={selectedProfiles[id]} bind:selectedDevice />
+			<div class="flex min-w-0 grow flex-col">
+				{#if Object.keys(devices).length > 0 && selectedProfiles}
+					{#if $inspectedParentAction}
+						<ParentActionView bind:profile={selectedProfiles[selectedDevice]} />
 					{/if}
-				{/each}
+
+					{#each Object.entries(devices) as [id, device]}
+						{#if device && selectedProfiles[id]}
+							<DeviceView bind:device bind:profile={selectedProfiles[id]} bind:selectedDevice />
+						{/if}
+					{/each}
+				{:else}
+					<NoDevicesDetected />
+				{/if}
+			</div>
+
+			<aside class="flex w-[360px] shrink-0 flex-col border-l border-app-border bg-app-panel">
+				<div class="flex h-10 shrink-0 items-center gap-1 border-b border-app-border px-3">
+					<button
+						class="rounded-lg px-3 py-1 text-xs text-app-muted hover:text-app-text"
+						class:bg-app-accent-soft={inspectorTab === "appearance"}
+						class:text-app-accent={inspectorTab === "appearance"}
+						on:click={() => (inspectorTab = "appearance")}
+					>
+						{$t("inspector.appearance")}
+					</button>
+					<button
+						class="rounded-lg px-3 py-1 text-xs text-app-muted hover:text-app-text"
+						class:bg-app-accent-soft={inspectorTab === "action"}
+						class:text-app-accent={inspectorTab === "action"}
+						on:click={() => (inspectorTab = "action")}
+					>
+						{$t("inspector.action")}
+					</button>
+				</div>
 
 				{#if selectedProfiles[selectedDevice]}
-					<PropertyInspectorView bind:device={devices[selectedDevice]} bind:profile={selectedProfiles[selectedDevice]} />
+					<div class="min-h-0 grow overflow-auto p-3" class:hidden={!selectedInstance || inspectorTab !== "action"}>
+						<PropertyInspectorView bind:device={devices[selectedDevice]} bind:profile={selectedProfiles[selectedDevice]} />
+					</div>
 				{/if}
-			{:else}
-				<NoDevicesDetected />
-			{/if}
+
+				{#if selectedInstance && inspectorTab === "appearance"}
+					<div class="min-h-0 grow overflow-auto p-3">
+						<InstanceEditor instance={selectedInstance} showEditor={true} inline />
+					</div>
+				{:else if !selectedInstance}
+					<div class="p-4 text-sm text-app-muted">{$t("inspector.empty")}</div>
+				{/if}
+			</aside>
 		</main>
 	</div>
-
-	<ActionList bind:this={$actionList} />
 </div>

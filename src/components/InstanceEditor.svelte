@@ -9,6 +9,7 @@
 
 	export let instance: ActionInstance;
 	export let showEditor: boolean;
+	export let inline: boolean = false;
 
 	let state: number = 0;
 	let bold: boolean;
@@ -65,7 +66,9 @@
 />
 
 <div
-	class="absolute left-1/2 top-1/2 max-h-[90vh] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded-2xl border border-app-border bg-app-elevated p-4 text-app-text shadow-2xl z-20"
+	class={inline
+		? "w-full overflow-auto rounded-xl border border-app-border bg-app-elevated p-3 text-app-text"
+		: "absolute left-1/2 top-1/2 max-h-[90vh] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded-2xl border border-app-border bg-app-elevated p-4 text-app-text shadow-2xl z-20"}
 >
 	<div class="flex flex-row">
 		<div class="select-wrapper m-1 w-full">
@@ -75,7 +78,9 @@
 				{/each}
 			</select>
 		</div>
-		<button class="ml-2 mr-1 float-right text-xl text-app-text" on:click={() => (showEditor = false)} aria-label={$t("settings.close")}>✕</button>
+		{#if !inline}
+			<button class="ml-2 mr-1 float-right text-xl text-app-text" on:click={() => (showEditor = false)} aria-label={$t("settings.close")}>✕</button>
+		{/if}
 	</div>
 	<div class="flex flex-row mx-1">
 		<div class="flex flex-col justify-center items-center mt-2 mb-1">

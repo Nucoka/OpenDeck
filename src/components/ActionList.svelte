@@ -76,7 +76,7 @@
 	}
 </script>
 
-<div class="flex flex-col w-[18rem] h-full bg-neutral-900 border-l border-neutral-700">
+<div class="flex h-full w-full flex-col bg-app-panel">
 	<div class="flex flex-row items-center m-2 bg-neutral-700 border border-neutral-600 rounded-lg">
 		<MagnifyingGlass size="13" class="ml-2 mr-1 text-neutral-300" />
 		<input bind:value={query} class="w-full p-1 text-sm text-neutral-300" placeholder={$t("action_list.search_placeholder")} type="search" spellcheck="false" />

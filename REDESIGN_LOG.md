@@ -29,4 +29,10 @@ Done: device selection moved from the sidebar into the centre column of a three-
 
 Not verified: no GUI run, so centring with unequal left/right column content was not measured visually.
 
-## Step 4 - pending
+## Step 4 - Devices workspace layout
+
+Done: main area is now three columns - a narrow action library (existing `ActionList`, still bound to the same singleton), the device stage, and a 360px inspector. Header left holds the existing profile select, centre the device selector, right brightness and Photo wall. Inspector has local `Appearance / Action` tabs: Appearance renders the existing `InstanceEditor` in a new `inline` layout mode (floating popup mode unchanged for right-click Edit), Action hosts the existing `PropertyInspectorView` iframes. The iframe container stays mounted and is only hidden while the Appearance tab is active, so plugin PI sessions survive tab switches. Empty state shows a hint. No Advanced tab: no real data exists for it.
+
+Not verified: no GUI run; selected-instance lookup handles full ActionContext strings from `$inspectedInstance` but empty-slot selections store a Context object and intentionally show the empty state. The inspector may render both the Key's floating editor and the inline editor if a user right-clicks a selected button; both remain functional.
+
+## Step 5 - pending
