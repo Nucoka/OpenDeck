@@ -47,4 +47,10 @@ Done: added `--font-sans` (Inter with installed fallbacks) and `--font-mono` (Je
 
 Not verified: no GUI run; no visual contrast or typography measurement. Inter / JetBrains Mono are not bundled (no dependencies allowed), so the browser will use the fallback families unless the user has them installed.
 
-## Step 7 - pending
+## Step 7 - accessibility and polish
+
+Done: global `:focus-visible` 2px accent outline with 2px offset for buttons, selects, inputs, textareas, role=button and focusable elements; disabled controls are dimmed and non-interactive; active buttons get a 1px press shift; input/select/textarea hover border uses the accent token. Added a shared `.empty-state` class and applied it to the no-devices screen and the inspector empty state. Colour tokens were chosen for AA contrast on the dark background.
+
+Not verified: no GUI run, so focus ring visibility, actual contrast ratios and hover/pressed feel were not measured in the Tauri webview.
+
+## Step 8 - pending

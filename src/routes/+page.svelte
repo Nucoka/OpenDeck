@@ -170,7 +170,7 @@
 						<InstanceEditor instance={selectedInstance} showEditor={true} inline />
 					</div>
 				{:else if !selectedInstance}
-					<div class="p-4 text-sm text-app-muted">{$t("inspector.empty")}</div>
+					<div class="empty-state">{$t("inspector.empty")}</div>
 				{/if}
 			</aside>
 		</main>

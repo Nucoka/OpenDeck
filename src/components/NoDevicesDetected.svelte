@@ -8,7 +8,7 @@
 	(async () => (buildInfo = await invoke("get_build_info")))();
 </script>
 
-<div class="flex flex-col justify-center items-center w-full h-full text-center text-app-text">
+<div class="empty-state h-full w-full">
 	<div class="w-80 text-sm">
 		<h2 class="text-lg font-bold mb-2">{$t("no_devices_detected.title")}</h2>
 		<p class="mb-2">{$t("no_devices_detected.check_connection")}</p>
