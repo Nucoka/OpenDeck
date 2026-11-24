@@ -126,7 +126,7 @@
 	}}
 />
 
-<div class="px-6 pt-6 pb-4 text-neutral-300">
+<div class="px-6 pt-6 pb-4 text-app-text">
 	<button class="float-right text-xl" on:click={() => ($inspectedParentAction = null)} aria-label={$t("settings.close")}>✕</button>
 	<h1 class="font-semibold text-2xl">{parentUuid == "opendeck.toggleaction" ? $t("parent_action_view.toggle") : $t("parent_action_view.multi")}</h1>
 </div>
@@ -143,7 +143,7 @@
 	{#each children as instance, index}
 		<!-- svelte-ignore a11y-no-noninteractive-tabindex a11y-no-noninteractive-element-interactions -->
 		<div
-			class="flex flex-row items-center mx-4 my-1 bg-neutral-700 hover:bg-neutral-600 transition-colors border border-neutral-600 rounded-lg focus-within:outline-solid focus-within:outline-offset-2 focus-within:outline-blue-500"
+			class="flex flex-row items-center mx-4 my-1 bg-app-elevated hover:bg-app-border transition-colors border border-app-border rounded-lg focus-within:outline-solid focus-within:outline-offset-2 focus-within:outline-app-accent"
 			class:my-2={parentUuid == "opendeck.toggleaction"}
 			on:click|stopPropagation={() => ($inspectedInstance = instance.context)}
 			on:focus|stopPropagation={() => ($inspectedInstance = instance.context)}
@@ -166,20 +166,20 @@
 					" " +
 					(index + 1)}
 			/>
-			<p class="ml-4 text-xl text-neutral-300">{instance.action.name}</p>
+			<p class="ml-4 text-xl text-app-text">{instance.action.name}</p>
 			<button
 				class="ml-auto mr-10"
 				on:click|stopPropagation={() => removeInstance(index)}
 				tabindex={-1}
 				aria-label={$t("parent_action_view.remove", { name: instance.action.name })}
 			>
-				<Trash size="32" class="text-neutral-400" />
+				<Trash size="32" class="text-app-muted" />
 			</button>
 		</div>
 
 		{#if parentUuid == "opendeck.multiaction" && index < children.length - 1}
-			<div class="flex flex-row items-center gap-2 mx-14 my-1 px-3 py-2 bg-neutral-800 border border-dashed border-neutral-600 rounded-lg">
-				<span class="text-xs text-neutral-400">{$t("parent_action_view.delay.label")}</span>
+			<div class="flex flex-row items-center gap-2 mx-14 my-1 px-3 py-2 bg-app-panel border border-dashed border-app-border rounded-lg">
+				<span class="text-xs text-app-muted">{$t("parent_action_view.delay.label")}</span>
 				<input
 					type="number"
 					min="0"
@@ -187,16 +187,16 @@
 					step="100"
 					value={parentSettings?.delays?.[index] ?? 100}
 					on:input={(e) => setDelay(index, e)}
-					class="no-spinner w-20 px-1 py-0.5 text-center text-sm text-neutral-300 bg-neutral-900 border border-neutral-600 rounded"
+					class="no-spinner w-20 px-1 py-0.5 text-center text-sm text-app-text bg-app-bg border border-app-border rounded"
 					aria-label={$t("parent_action_view.delay.aria", { name: children[index + 1].action.name })}
 				/>
-				<span class="text-xs text-neutral-500">ms</span>
+				<span class="text-xs text-app-muted">ms</span>
 			</div>
 		{/if}
 	{/each}
 	<!-- svelte-ignore a11y-no-noninteractive-tabindex a11y-no-noninteractive-element-interactions -->
 	<div
-		class="flex flex-row items-center mx-4 mt-2 mb-4 p-3 bg-neutral-700 hover:bg-neutral-600 transition-colors border border-dashed border-neutral-600 rounded-lg focus-within:outline-solid focus-within:outline-offset-2 focus-within:outline-blue-500"
+		class="flex flex-row items-center mx-4 mt-2 mb-4 p-3 bg-app-elevated hover:bg-app-border transition-colors border border-dashed border-app-border rounded-lg focus-within:outline-solid focus-within:outline-offset-2 focus-within:outline-app-accent"
 		on:dragover={handleDragOver}
 		on:drop={handleDrop}
 		on:click={() => ($inspectedInstance = null)}
@@ -209,7 +209,7 @@
 		aria-label={$t("parent_action_view.drag_copy")}
 	>
 		<img src="/cube.png" class="m-2 w-24 rounded-xl" alt="" />
-		<p class="ml-4 text-xl text-neutral-400">{$t("parent_action_view.drag_paste")}</p>
+		<p class="ml-4 text-xl text-app-muted">{$t("parent_action_view.drag_paste")}</p>
 	</div>
 </div>
 

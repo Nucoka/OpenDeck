@@ -264,13 +264,13 @@
 
 <Popup {show} label={$t("photo_wall.title")}>
 	<svelte:fragment slot="header">
-		<button class="mr-2 my-1 float-right text-xl text-neutral-300" on:click={() => (show = false)} aria-label={$t("photo_wall.close")}>✕</button>
-		<h2 class="m-2 font-semibold text-xl text-neutral-300">{$t("photo_wall.title")}</h2>
+		<button class="mr-2 my-1 float-right text-xl text-app-text" on:click={() => (show = false)} aria-label={$t("photo_wall.close")}>✕</button>
+		<h2 class="m-2 font-semibold text-xl text-app-text">{$t("photo_wall.title")}</h2>
 	</svelte:fragment>
 
 	<div class="flex flex-col space-y-3 m-2">
 		<button
-			class="p-6 text-sm text-neutral-400 bg-neutral-700 hover:bg-neutral-600 transition-colors border border-dashed border-neutral-600 rounded-lg"
+			class="p-6 text-sm text-app-muted bg-app-elevated hover:bg-app-border transition-colors border border-dashed border-app-border rounded-lg"
 			on:click={() => fileInput.click()}
 			on:dragover|preventDefault
 			on:drop|preventDefault={(event) => useFile(event.dataTransfer?.files?.[0])}
@@ -288,22 +288,22 @@
 			}}
 		/>
 		{#if error}
-			<p class="text-sm text-red-400">{$t("photo_wall.error")}: {error}</p>
+			<p class="text-sm text-app-danger">{$t("photo_wall.error")}: {error}</p>
 		{/if}
 
 		<div class="flex flex-row items-center space-x-2">
-			<span class="text-neutral-400">{$t("photo_wall.mode")}:</span>
-			<div class="flex flex-row overflow-hidden border border-neutral-600 rounded-lg">
+			<span class="text-app-muted">{$t("photo_wall.mode")}:</span>
+			<div class="flex flex-row overflow-hidden border border-app-border rounded-lg">
 				<button
-					class="px-3 py-1 text-sm text-neutral-300 bg-neutral-700 hover:bg-neutral-600 transition-colors"
-					class:bg-blue-600={mode === "cover"}
+					class="px-3 py-1 text-sm text-app-text bg-app-elevated hover:bg-app-border transition-colors"
+					class:bg-app-accent={mode === "cover"}
 					on:click={() => (mode = "cover")}
 				>
 					{$t("photo_wall.mode.cover")}
 				</button>
 				<button
-					class="px-3 py-1 text-sm text-neutral-300 bg-neutral-700 hover:bg-neutral-600 transition-colors border-l border-neutral-600"
-					class:bg-blue-600={mode === "fit"}
+					class="px-3 py-1 text-sm text-app-text bg-app-elevated hover:bg-app-border transition-colors border-l border-app-border"
+					class:bg-app-accent={mode === "fit"}
 					on:click={() => (mode = "fit")}
 				>
 					{$t("photo_wall.mode.fit")}
@@ -312,53 +312,53 @@
 		</div>
 
 		<div class="flex flex-row items-center space-x-2">
-			<label for="photo-wall-columns" class="text-neutral-400">{$t("photo_wall.screen_columns")}:</label>
+			<label for="photo-wall-columns" class="text-app-muted">{$t("photo_wall.screen_columns")}:</label>
 			<input type="range" min="1" max={device.columns} bind:value={screenColumns} id="photo-wall-columns" />
-			<span class="w-8 text-sm text-neutral-300 tabular-nums">{columnsWithScreens}</span>
+			<span class="w-8 text-sm text-app-text font-mono tabular-nums">{columnsWithScreens}</span>
 		</div>
 
 		<div class="flex flex-row items-center space-x-2">
-			<label for="photo-wall-gap" class="text-neutral-400">{$t("photo_wall.gap")}:</label>
+			<label for="photo-wall-gap" class="text-app-muted">{$t("photo_wall.gap")}:</label>
 			<input type="range" min="0" max="80" bind:value={gap} id="photo-wall-gap" />
-			<span class="w-8 text-sm text-neutral-300 tabular-nums">{gap}</span>
+			<span class="w-8 text-sm text-app-text font-mono tabular-nums">{gap}</span>
 		</div>
 
 		{#if mode === "fit"}
 			<div class="flex flex-row items-center space-x-2">
-				<label for="photo-wall-background" class="text-neutral-400">{$t("photo_wall.background")}:</label>
-				<input type="color" bind:value={background} class="w-8 h-6 bg-neutral-600" id="photo-wall-background" />
+				<label for="photo-wall-background" class="text-app-muted">{$t("photo_wall.background")}:</label>
+				<input type="color" bind:value={background} class="w-8 h-6 bg-app-elevated" id="photo-wall-background" />
 			</div>
 		{/if}
 
 		<div class="flex flex-row items-center space-x-2">
 			<input type="checkbox" bind:checked={hideText} class="scale-125" id="photo-wall-hide-text" />
-			<label for="photo-wall-hide-text" class="text-neutral-400">{$t("photo_wall.hide_text")}</label>
+			<label for="photo-wall-hide-text" class="text-app-muted">{$t("photo_wall.hide_text")}</label>
 		</div>
 
 		{#if isDev}
 			<div class="flex flex-row items-center space-x-2">
-				<label for="photo-wall-limit" class="text-neutral-400">{$t("photo_wall.limit")}:</label>
+				<label for="photo-wall-limit" class="text-app-muted">{$t("photo_wall.limit")}:</label>
 				<input
 					type="number"
 					min="1"
 					max={device.rows * columnsWithScreens}
 					bind:value={limit}
-					class="w-16 px-1 text-neutral-300 border border-neutral-600 rounded-lg"
+					class="w-16 px-1 text-app-text border border-app-border rounded-lg"
 					id="photo-wall-limit"
 				/>
 			</div>
 		{/if}
 
-		<h3 class="font-semibold text-neutral-300">{$t("photo_wall.preview")}</h3>
-		<canvas bind:this={previewCanvas} class="max-w-full border border-neutral-600 rounded-lg" aria-label={$t("photo_wall.preview")} />
+		<h3 class="font-semibold text-app-text">{$t("photo_wall.preview")}</h3>
+		<canvas bind:this={previewCanvas} class="max-w-full border border-app-border rounded-lg" aria-label={$t("photo_wall.preview")} />
 	</div>
 
 	<svelte:fragment slot="footer">
 		<div class="flex flex-row items-center justify-end m-2 space-x-2">
 			{#if applying || resetting}
-				<span class="text-sm text-neutral-300 tabular-nums">{$t("photo_wall.progress", { n: progress, total })}</span>
+				<span class="text-sm text-app-text font-mono tabular-nums">{$t("photo_wall.progress", { n: progress, total })}</span>
 				<button
-					class="px-3 py-1 text-sm text-neutral-300 bg-neutral-700 hover:bg-neutral-600 transition-colors border border-neutral-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+					class="px-3 py-1 text-sm text-app-text bg-app-elevated hover:bg-app-border transition-colors border border-app-border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
 					on:click={cancel}
 					disabled={cancelled}
 				>
@@ -366,9 +366,9 @@
 				</button>
 			{/if}
 			{#if snapshot.length > 0}
-				<span class="text-xs text-neutral-500">{$t("photo_wall.reset.warning")}</span>
+				<span class="text-xs text-app-muted">{$t("photo_wall.reset.warning")}</span>
 				<button
-					class="px-3 py-1 text-sm text-neutral-300 bg-neutral-700 hover:bg-neutral-600 transition-colors border border-neutral-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+					class="px-3 py-1 text-sm text-app-text bg-app-elevated hover:bg-app-border transition-colors border border-app-border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
 					on:click={() => void reset()}
 					disabled={applying || resetting}
 				>
@@ -376,7 +376,7 @@
 				</button>
 			{/if}
 			<button
-				class="px-3 py-1 text-sm text-neutral-300 bg-neutral-700 hover:bg-neutral-600 transition-colors border border-neutral-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+				class="px-3 py-1 text-sm text-app-text bg-app-elevated hover:bg-app-border transition-colors border border-app-border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
 				on:click={() => void apply()}
 				disabled={!image || !profile || applying || resetting}
 			>

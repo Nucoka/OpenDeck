@@ -241,20 +241,20 @@
 	>
 		{#if !slot}
 			<button class="flex flex-row items-center w-full p-2 hover:bg-app-border transition-colors rounded-lg cursor-pointer" on:click|stopPropagation={paste}>
-				<Clipboard size="18" class="text-neutral-300" />
+				<Clipboard size="18" class="text-app-text" />
 				<span class="ml-2">{$t("key.paste")}</span>
 			</button>
 		{:else}
-			<button class="flex flex-row items-center w-full p-2 hover:bg-neutral-600 transition-colors rounded-t-lg cursor-pointer" on:click|stopPropagation={edit}>
-				<Pencil size="18" class="text-neutral-300" />
+			<button class="flex flex-row items-center w-full p-2 hover:bg-app-border transition-colors rounded-t-lg cursor-pointer" on:click|stopPropagation={edit}>
+				<Pencil size="18" class="text-app-text" />
 				<span class="ml-2">{$t("key.edit")}</span>
 			</button>
-			<button class="flex flex-row items-center w-full p-2 hover:bg-neutral-600 transition-colors cursor-pointer" on:click|stopPropagation={copy}>
-				<Copy size="18" class="text-neutral-300" />
+			<button class="flex flex-row items-center w-full p-2 hover:bg-app-border transition-colors cursor-pointer" on:click|stopPropagation={copy}>
+				<Copy size="18" class="text-app-text" />
 				<span class="ml-2">{$t("key.copy")}</span>
 			</button>
-			<button class="flex flex-row items-center w-full p-2 hover:bg-neutral-600 transition-colors rounded-b-lg cursor-pointer" on:click|stopPropagation={clear}>
-				<Trash size="18" class="text-red-400" />
+			<button class="flex flex-row items-center w-full p-2 hover:bg-app-border transition-colors rounded-b-lg cursor-pointer" on:click|stopPropagation={clear}>
+				<Trash size="18" class="text-app-danger" />
 				<span class="ml-2">{$t("key.delete")}</span>
 			</button>
 		{/if}

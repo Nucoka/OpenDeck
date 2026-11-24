@@ -73,12 +73,12 @@
 </script>
 
 <Popup show label={$t("plugin_details.title", { name: details.name })}>
-	<button class="mr-2 my-1 float-right text-xl text-neutral-300" on:click={close} aria-label={$t("settings.close")}>✕</button>
+	<button class="mr-2 my-1 float-right text-xl text-app-text" on:click={close} aria-label={$t("settings.close")}>✕</button>
 	<div class="flex flex-row items-start">
-		<img src={"https://openactionapi.github.io/plugins/icons/" + id + ".png"} alt={details.name} class="size-48 rounded-2xl" />
+		<img src={"https://openactionapi.github.io/plugins/icons/" + id + ".png"} alt={details.name} class="size-48 rounded-xl" />
 		<div class="flex flex-col justify-center h-48 ml-8">
-			<div class="text-3xl text-neutral-200">{details.name}</div>
-			<div class="flex items-center mt-2 text-lg text-neutral-400">
+			<div class="text-3xl text-app-text">{details.name}</div>
+			<div class="flex items-center mt-2 text-lg text-app-muted">
 				<span class="mr-2">{$t("plugin_details.by")}</span>
 				<img src={"https://avatars.githubusercontent.com/" + details.repository.split("/")[3]} alt="Author avatar" class="size-7 mr-1.5 rounded-full" />
 				<a
@@ -93,28 +93,28 @@
 					{/if}
 				</a>
 				{#if details.flags?.ai_assisted}
-					<Robot size="20" class="ml-1.5 text-yellow-500" />
+					<Robot size="20" class="ml-1.5 text-app-warning" />
 				{/if}
 			</div>
 
 			<div class="flex flex-row items-center mt-6">
 				<button
 					on:click={install}
-					class="px-8 py-3 active:translate-y-0.5 text-lg text-neutral-100 bg-indigo-600 hover:bg-indigo-500 transition-colors border border-indigo-500 rounded-l-lg"
+					class="px-8 py-3 active:translate-y-0.5 text-lg text-app-text bg-app-accent hover:bg-app-accent-soft transition-colors border border-app-accent rounded-l-lg"
 				>
 					{$t("plugin_details.install")}
 				</button>
 
 				<button
 					on:click={() => invoke("open_url", { url: details.download_url ?? details.repository + "/releases/latest" })}
-					class="ml-1 p-3.5 active:translate-y-0.5 text-lg text-neutral-100 bg-indigo-600 hover:bg-indigo-500 transition-colors border border-indigo-500 rounded-r-lg"
+					class="ml-1 p-3.5 active:translate-y-0.5 text-lg text-app-text bg-app-accent hover:bg-app-accent-soft transition-colors border border-app-accent rounded-r-lg"
 					aria-label={$t("plugin_details.download_latest")}
 				>
 					<ArrowSquareOut size={24} />
 				</button>
 
 				{#if downloadCount}
-					<div class="flex flex-row ml-6 text-neutral-300">
+					<div class="flex flex-row ml-6 text-app-text">
 						<span class="mr-1 text-lg">{downloadCount}</span>
 						<DownloadSimple size={28} />
 					</div>
@@ -125,7 +125,7 @@
 
 	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 	<div
-		class="mt-4 p-6 plugin-readme text-neutral-300 border-4 border-neutral-600 rounded-xl"
+		class="mt-4 p-6 plugin-readme text-app-text border-4 border-app-border rounded-xl"
 		on:click={handleReadmeClick}
 		on:keyup={handleReadmeClick}
 		role="region"

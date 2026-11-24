@@ -411,7 +411,7 @@
 		</button>
 	</div>
 
-	<div class="flex flex-row items-center mx-2 my-4 p-3 space-x-2 bg-yellow-900/20 border-l-4 border-yellow-500 rounded">
+	<div class="flex flex-row items-center mx-2 my-4 p-3 space-x-2 bg-app-warning/10 border-l-4 border-app-warning rounded">
 		<WarningCircle size="20" class="mt-0.5 text-app-warning" />
 		<div class="text-sm text-app-warning-soft">
 			{$t("plugin_manager.warning", { PRODUCT_NAME })}

@@ -172,7 +172,7 @@
 		on:focusin={handleGridFocusin}
 	>
 		<div class="device-grid-scale" style={`--grid-columns: ${device.columns}`}>
-			<div class="rounded-2xl border border-app-border bg-app-panel p-4" role="presentation">
+			<div class="rounded-xl border border-app-border bg-app-panel p-4" role="presentation">
 				<div class="flex flex-col" role="rowgroup">
 					{#each { length: device.rows } as _, r}
 						<div class="flex flex-row" role="row">
@@ -195,7 +195,7 @@
 			</div>
 
 			{#if device.encoders > 0}
-				<div class="mt-4 flex flex-row justify-between rounded-2xl border border-app-border bg-app-panel p-4" role="row" style={`width: ${keypadRowWidth}px;`}>
+				<div class="mt-4 flex flex-row justify-between rounded-xl border border-app-border bg-app-panel p-4" role="row" style={`width: ${keypadRowWidth}px;`}>
 					{#each { length: device.encoders } as _, i}
 						<Key
 							context={{ device: device.id, profile: profile.id, controller: "Encoder", position: i }}
@@ -213,7 +213,7 @@
 			{/if}
 
 			{#if device.touchpoints > 0}
-				<div class="mt-4 flex flex-row items-center rounded-2xl border border-app-border bg-app-panel p-4" role="row">
+				<div class="mt-4 flex flex-row items-center rounded-xl border border-app-border bg-app-panel p-4" role="row">
 					{#each { length: device.touchpoints } as _, i}
 						<!-- On the Stream Deck Neo, the infobar display sits physically between the two touchpoints. -->
 						{#if device.infobars > 0 && i === 1}

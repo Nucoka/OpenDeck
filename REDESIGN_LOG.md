@@ -41,4 +41,10 @@ Done: plugin cards already matched the mockup structure from the earlier redesig
 
 Not verified: no GUI run; card wrapping and badge contrast were checked in source only.
 
-## Step 6 - pending
+## Step 6 - tokens across remaining screens and dialogs
+
+Done: added `--font-sans` (Inter with installed fallbacks) and `--font-mono` (JetBrains Mono with installed fallbacks) tokens; body and numeric/version labels use them. Converted remaining hard-coded neutral/blue/indigo/red/green/yellow utility classes in components and global select/readme styles to `app-*` tokens. Dialogs use 12px radius (`rounded-xl`), inline panels 8px (`rounded-lg`), spacing stays on the 4px scale. Popups, Settings, Profiles, PluginDetails, tooltips, context menus, action library and Photo wall all follow the same tokens.
+
+Not verified: no GUI run; no visual contrast or typography measurement. Inter / JetBrains Mono are not bundled (no dependencies allowed), so the browser will use the fallback families unless the user has them installed.
+
+## Step 7 - pending

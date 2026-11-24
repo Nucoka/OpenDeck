@@ -68,7 +68,7 @@
 <div
 	class={inline
 		? "w-full overflow-auto rounded-xl border border-app-border bg-app-elevated p-3 text-app-text"
-		: "absolute left-1/2 top-1/2 max-h-[90vh] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded-2xl border border-app-border bg-app-elevated p-4 text-app-text shadow-2xl z-20"}
+		: "absolute left-1/2 top-1/2 max-h-[90vh] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded-xl border border-app-border bg-app-elevated p-4 text-app-text shadow-2xl z-20"}
 >
 	<div class="flex flex-row">
 		<div class="select-wrapper m-1 w-full">

@@ -224,14 +224,14 @@
 />
 
 <Popup show={showPopup} label="{device.name} {$t('profile_manager.profiles')}">
-	<button class="mr-1 float-right text-xl text-neutral-300" on:click={() => (showPopup = false)} aria-label={$t("settings.close")}>✕</button>
-	<h2 class="text-xl font-semibold text-neutral-300">{device.name}</h2>
+	<button class="mr-1 float-right text-xl text-app-text" on:click={() => (showPopup = false)} aria-label={$t("settings.close")}>✕</button>
+	<h2 class="text-xl font-semibold text-app-text">{device.name}</h2>
 
 	<div class="flex flex-row mt-2 mb-1">
 		<input
 			bind:this={nameInput}
 			pattern="[a-zA-Z0-9_ ]+(\/[a-zA-Z0-9_ ]+)?"
-			class="grow p-2 text-neutral-300 invalid:text-red-400 bg-neutral-700 border-l border-y border-neutral-600 rounded-l-lg"
+			class="grow p-2 text-app-text invalid:text-app-danger bg-app-elevated border-l border-y border-app-border rounded-l-lg"
 			placeholder={$t("profile_manager.create.placeholder")}
 			aria-label={$t("profile_manager.create.label")}
 		/>
@@ -244,13 +244,13 @@
 				nameInput.value = "";
 				showPopup = false;
 			}}
-			class="px-4 text-neutral-300 bg-neutral-900 hover:bg-neutral-800 transition-colors border-r border-y border-neutral-600 rounded-r-lg"
+			class="px-4 text-app-text bg-app-bg hover:bg-app-elevated transition-colors border-r border-y border-app-border rounded-r-lg"
 		>
 			{$t("profile_manager.create")}
 		</button>
 
 		<button
-			class="ml-2 px-4 flex items-center text-neutral-300 bg-neutral-900 hover:bg-neutral-800 transition-colors border border-neutral-600 rounded-lg"
+			class="ml-2 px-4 flex items-center text-app-text bg-app-bg hover:bg-app-elevated transition-colors border border-app-border rounded-lg"
 			on:click={() => (showApplicationManager = true)}
 			aria-label={$t("profile_manager.application_profiles")}
 		>
@@ -258,10 +258,10 @@
 		</button>
 	</div>
 
-	<div class="divide-y divide-neutral-500!">
+	<div class="divide-y divide-app-border!">
 		{#each Object.entries(folders).sort() as [id, profiles]}
 			{#if id && profiles.length}
-				<h4 class="py-2 font-bold text-lg text-neutral-300">{id}</h4>
+				<h4 class="py-2 font-bold text-lg text-app-text">{id}</h4>
 			{/if}
 			{#each profiles.sort() as profile}
 				<div class="flex flex-row items-center py-2 space-x-2" class:ml-6={id} class:pl-2={id}>
@@ -279,26 +279,26 @@
 							bind:this={renameInput}
 							bind:value={newId}
 							pattern="[a-zA-Z0-9_ ]+(\/[a-zA-Z0-9_ ]+)?"
-							class="grow px-2 py-1 text-neutral-300 invalid:text-red-400 bg-neutral-700 rounded"
+							class="grow px-2 py-1 text-app-text invalid:text-app-danger bg-app-elevated rounded"
 							placeholder='Profile name or "folder/name"'
 							on:keydown={(e) => {
 								if (e.key === "Enter") saveRenamedProfile(profile);
 							}}
 						/>
 						<button on:click={() => saveRenamedProfile(profile)} title={$t("profile_manager.save")} aria-label={$t("profile_manager.save")}>
-							<FloppyDisk size="20" class="text-green-500" />
+							<FloppyDisk size="20" class="text-app-success" />
 						</button>
 					{:else}
-						<label class="grow text-neutral-400" for={`profile-${encodeURIComponent(profile)}`}>{id ? profile.split("/")[1] : profile}</label>
+						<label class="grow text-app-muted" for={`profile-${encodeURIComponent(profile)}`}>{id ? profile.split("/")[1] : profile}</label>
 						<button on:click={() => duplicateProfile(profile)} title={$t("profile_manager.duplicate")} aria-label={$t("profile_manager.duplicate")}>
-							<Copy size="20" class="text-neutral-400" />
+							<Copy size="20" class="text-app-muted" />
 						</button>
 						{#if profile != value}
 							<button on:click={() => (renamingProfile = newId = profile)} title={$t("profile_manager.rename")} aria-label={$t("profile_manager.rename")}>
-								<Pencil size="20" class="text-neutral-400" />
+								<Pencil size="20" class="text-app-muted" />
 							</button>
 							<button on:click={() => deleteProfile(profile)} title={$t("profile_manager.delete")} aria-label={$t("profile_manager.delete")}>
-								<Trash size="20" class="text-neutral-400" />
+								<Trash size="20" class="text-app-muted" />
 							</button>
 						{/if}
 					{/if}
@@ -310,13 +310,13 @@
 
 <Popup show={showApplicationManager} label={$t("profile_manager.application_profiles")}>
 	<svelte:fragment slot="header">
-		<button class="mr-1 float-right text-xl text-neutral-300" on:click={() => (showApplicationManager = false)} aria-label={$t("settings.close")}>✕</button>
-		<h2 class="text-xl font-semibold text-neutral-300">{device.name}</h2>
-		<span class="text-sm text-neutral-400">{$t("profile_manager.application_profiles.hint.1")}</span>
-		<span class="text-sm text-neutral-400">{$t("profile_manager.application_profiles.hint.2")}</span>
+		<button class="mr-1 float-right text-xl text-app-text" on:click={() => (showApplicationManager = false)} aria-label={$t("settings.close")}>✕</button>
+		<h2 class="text-xl font-semibold text-app-text">{device.name}</h2>
+		<span class="text-sm text-app-muted">{$t("profile_manager.application_profiles.hint.1")}</span>
+		<span class="text-sm text-app-muted">{$t("profile_manager.application_profiles.hint.2")}</span>
 	</svelte:fragment>
 
-	<table class="w-full text-neutral-300 divide-y divide-neutral-500!">
+	<table class="w-full text-app-text divide-y divide-app-border!">
 		{#each Object.entries(applicationProfiles).sort( (a, b) => (a[0] == "opendeck_default" ? -1 : b[0] == "opendeck_default" ? 1 : a[0].localeCompare(b[0])), ) as [appName, devices]}
 			{#if devices[device.id]}
 				<tr class="h-12">
