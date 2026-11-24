@@ -59,4 +59,8 @@ Done: source review found no `blur()` or `backdrop-filter` anywhere, so the "blu
 
 Not verified: no GUI run, no profiling, no measurement of repaint counts.
 
-## Step 9 - pending
+## Step 9 - final report
+
+Done: created `REDESIGN_REPORT.md` with step summary, no rollbacks, mockup differences, the full list of things not visually verified, and a five-item manual check list. Pushed branch `redesign` to origin without force.
+
+Not verified: report content was not rendered as Markdown in the app; no GUI run at any step.
