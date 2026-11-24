@@ -86,7 +86,7 @@
 	<div class="grow overflow-auto select-none divide-y divide-app-border!">
 		{#each filteredCategories as [name, { icon, actions }]}
 			<details open>
-				<summary class="pl-4 py-3 text-lg font-semibold text-app-text hover:bg-app-elevated transition-colors cursor-pointer">
+				<summary class="pl-4 py-3 text-lg font-semibold text-app-text hover:bg-app-elevated cursor-pointer">
 					{#if icon || (actions[0] && plugins.find((x) => x.id == actions[0].plugin) && categories[name].actions.every((x) => x.plugin == actions[0].plugin))}
 						<img
 							src={icon
@@ -103,7 +103,7 @@
 				<div role="listbox" aria-label={name} aria-describedby="action-list-hint" tabindex="-1" on:keydown={handleListKeydown} on:focusin={handleListFocusin}>
 					{#each actions as action, i}
 						<div
-							class="flex flex-row items-center p-2 pl-6 bg-app-bg hover:bg-app-panel transition-colors border-t border-app-border cursor-grab active:cursor-grabbing"
+							class="flex flex-row items-center p-2 pl-6 bg-app-bg hover:bg-app-panel border-t border-app-border cursor-grab active:cursor-grabbing"
 							draggable="true"
 							title={$localisations?.[action.plugin]?.[action.uuid]?.Tooltip ?? action.tooltip}
 							role="option"

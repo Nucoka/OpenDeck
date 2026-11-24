@@ -68,7 +68,7 @@
 <div
 	class={inline
 		? "w-full overflow-auto rounded-xl border border-app-border bg-app-elevated p-3 text-app-text"
-		: "absolute left-1/2 top-1/2 max-h-[90vh] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded-xl border border-app-border bg-app-elevated p-4 text-app-text shadow-2xl z-20"}
+		: "absolute left-1/2 top-1/2 max-h-[90vh] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded-xl border border-app-border bg-app-elevated p-4 text-app-text shadow-lg z-20"}
 >
 	<div class="flex flex-row">
 		<div class="select-wrapper m-1 w-full">
@@ -116,7 +116,7 @@
 			<div class="flex flex-row items-center justify-center mt-1 space-x-1 text-app-text">
 				<button
 					on:click={() => adjustImageScale(-10)}
-					class="w-6 h-6 text-sm bg-app-elevated hover:bg-app-border transition-colors border border-app-border rounded-md"
+					class="w-6 h-6 text-sm bg-app-elevated hover:bg-app-border border border-app-border rounded-md"
 					title={$t("instance_editor.image.scale.decrease")}
 					aria-label={$t("instance_editor.image.scale.decrease")}
 				>
@@ -127,7 +127,7 @@
 				</span>
 				<button
 					on:click={() => adjustImageScale(10)}
-					class="w-6 h-6 text-sm bg-app-elevated hover:bg-app-border transition-colors border border-app-border rounded-md"
+					class="w-6 h-6 text-sm bg-app-elevated hover:bg-app-border border border-app-border rounded-md"
 					title={$t("instance_editor.image.scale.increase")}
 					aria-label={$t("instance_editor.image.scale.increase")}
 				>
@@ -148,7 +148,7 @@
 				on:mouseleave={() => {
 					if (navigator.userAgent.toLowerCase().includes("mac")) backgroundColourInput.className = "absolute invisible w-0 h-0";
 				}}
-				class="mt-1 px-0.5 text-sm text-app-text bg-app-elevated hover:bg-app-border transition-colors border border-app-border rounded-lg"
+				class="mt-1 px-0.5 text-sm text-app-text bg-app-elevated hover:bg-app-border border border-app-border rounded-lg"
 			>
 				{$t("instance_editor.background")}
 				<input bind:this={backgroundColourInput} type="color" bind:value={instance.states[state].background_colour} class="absolute invisible w-0 h-0" />
@@ -167,7 +167,7 @@
 				on:mouseleave={() => {
 					if (navigator.userAgent.toLowerCase().includes("mac")) solidColourInput.className = "absolute invisible w-0 h-0";
 				}}
-				class="mt-1 px-0.5 text-sm text-app-text bg-app-elevated hover:bg-app-border transition-colors border border-app-border rounded-lg"
+				class="mt-1 px-0.5 text-sm text-app-text bg-app-elevated hover:bg-app-border border border-app-border rounded-lg"
 			>
 				{$t("instance_editor.solid_colour")}
 				<input

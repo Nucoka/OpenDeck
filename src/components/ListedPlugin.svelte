@@ -15,7 +15,7 @@
 	export let description: string = "";
 </script>
 
-<div class="m-2 flex flex-col rounded-xl border border-app-border bg-app-panel p-3 transition-colors hover:border-app-accent" class:hidden>
+<div class="m-2 flex flex-col rounded-xl border border-app-border bg-app-panel p-3 hover:border-app-accent" class:hidden>
 	<div class="flex items-start gap-3">
 		<img src={icon} class="size-12 rounded-lg" class:opacity-75={disconnected} alt={name} loading="lazy" />
 		<div class="min-w-0 flex-1">

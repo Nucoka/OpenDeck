@@ -53,4 +53,10 @@ Done: global `:focus-visible` 2px accent outline with 2px offset for buttons, se
 
 Not verified: no GUI run, so focus ring visibility, actual contrast ratios and hover/pressed feel were not measured in the Tauri webview.
 
-## Step 8 - pending
+## Step 8 - safe performance pass
+
+Done: source review found no `blur()` or `backdrop-filter` anywhere, so the "blur only on sidebar and modals" rule is already satisfied. Removed `transition-colors` from the high-count action list rows and plugin cards to avoid per-hover paint work on long lists, and reduced the floating editor modal shadow from `shadow-2xl` to `shadow-lg`. Device grid zoom is a pure CSS calculation that only recalculates on container resize; no JS resize logic was added.
+
+Not verified: no GUI run, no profiling, no measurement of repaint counts.
+
+## Step 9 - pending
