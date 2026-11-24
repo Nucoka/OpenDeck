@@ -23,4 +23,10 @@ Done: replaced the column-count zoom thresholds with a CSS container query. The 
 
 Not verified: no GUI run, so actual browser support for length division inside `calc()` in the Tauri webview was not observed. If the webview rejects it, the grid stays at zoom 1 and scrolls internally; fallback would be a resize observer (not added because it is logic, not markup/style).
 
-## Step 3 - pending
+## Step 3 - titlebar device selector and sidebar navigation
+
+Done: device selection moved from the sidebar into the centre column of a three-column titlebar. A status dot uses real registry data: green when `selectedDevice` resolves in `devices`, red otherwise. The sidebar keeps only the existing surfaces (Devices label, Plugins popup, Profiles select, Settings popup); no Backups screen or fake pages were added. All DeviceSelector bindings and Popup triggers are unchanged.
+
+Not verified: no GUI run, so centring with unequal left/right column content was not measured visually.
+
+## Step 4 - pending

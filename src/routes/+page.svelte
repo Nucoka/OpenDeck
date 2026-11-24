@@ -44,9 +44,9 @@
 		</div>
 
 		<nav class="flex flex-col gap-1 p-2" aria-label={$t("settings.button")}>
-			<div class="side-row side-row-active">
+			<div class="side-row side-row-active" aria-current="page">
 				<SquaresFour size={20} />
-				<DeviceSelector bind:devices bind:value={selectedDevice} bind:selectedProfiles bind:this={$deviceSelector} />
+				<span>{$t("device_selector.device")}</span>
 			</div>
 			<div class="side-row">
 				<Plug size={20} />
@@ -68,17 +68,20 @@
 	</aside>
 
 	<div class="flex min-w-0 grow flex-col">
-		<header class="flex h-14 shrink-0 items-center justify-between border-b border-app-border bg-app-bg px-6" class:hidden={$inspectedParentAction}>
-			<div class="flex items-center gap-3">
-				{#if selectedDevice && devices[selectedDevice]}
-					<div class="device-chip" title={devices[selectedDevice].id}>
-						<span class="size-2 rounded-full bg-app-success" aria-hidden="true" />
-						<span>{devices[selectedDevice].name}</span>
-					</div>
-				{/if}
+		<header class="grid h-14 shrink-0 grid-cols-3 items-center border-b border-app-border bg-app-bg px-6" class:hidden={$inspectedParentAction}>
+			<div aria-hidden="true"></div>
+
+			<div class="flex items-center justify-center gap-2">
+				<span
+					class="size-2 rounded-full"
+					class:bg-app-success={Boolean(selectedDevice && devices[selectedDevice])}
+					class:bg-app-danger={!selectedDevice || !devices[selectedDevice]}
+					aria-hidden="true"
+				/>
+				<DeviceSelector bind:devices bind:value={selectedDevice} bind:selectedProfiles bind:this={$deviceSelector} />
 			</div>
 
-			<div class="flex items-center gap-4">
+			<div class="flex items-center justify-end gap-4">
 				{#if $settings}
 					<label class="flex items-center gap-2 text-xs text-app-muted" for="header-brightness">
 						{$t("settings.brightness")}
