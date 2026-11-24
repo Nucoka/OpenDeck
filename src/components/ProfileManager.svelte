@@ -194,7 +194,7 @@
 </script>
 
 <div class="select-profile-wrapper">
-	<span bind:this={measure} class="invisible fixed whitespace-pre pointer-events-none" aria-hidden="true"></span>
+	<span bind:this={measure} class="invisible fixed whitespace-pre pointer-events-none text-sm" aria-hidden="true"></span>
 	<select bind:value style:width="{selectWidth}px" aria-label={$t("profile_manager.label")}>
 		{#each Object.entries(folders).sort() as [id, profiles]}
 			{#if id && profiles.length}

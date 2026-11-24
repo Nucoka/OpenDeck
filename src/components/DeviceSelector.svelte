@@ -73,7 +73,7 @@
 
 {#if Object.keys(devices).length > 0}
 	<div class="select-device-wrapper">
-		<span bind:this={measure} class="invisible fixed whitespace-pre pointer-events-none text-xl font-semibold" aria-hidden="true"></span>
+		<span bind:this={measure} class="invisible fixed whitespace-pre pointer-events-none text-sm font-semibold" aria-hidden="true"></span>
 		<select bind:value style:width="{selectWidth}px" aria-label={$t("device_selector.device")}>
 			<option value="" disabled selected>{$t("device_selector.choose_device")}</option>
 

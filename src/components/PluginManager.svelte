@@ -263,6 +263,22 @@
 
 	let query: string = "";
 
+	type PluginFilter = "all" | "installed" | "running" | "crashed";
+	const filters: PluginFilter[] = ["all", "installed", "running", "crashed"];
+	let pluginFilter: PluginFilter = "all";
+
+	$: filteredInstalled = installed
+		.filter((plugin) => {
+			const lower = query.toLowerCase().trim();
+			if (lower && !`${plugin.name} ${plugin.id}`.toLowerCase().includes(lower)) return false;
+			const status = statuses[plugin.id]?.status ?? plugin.status ?? "running";
+			if (pluginFilter === "installed") return !plugin.builtin;
+			if (pluginFilter === "running") return status === "running";
+			if (pluginFilter === "crashed") return status === "crashed" || status === "failed";
+			return true;
+		})
+		.sort((a, b) => (a.builtin && !b.builtin ? -1 : b.builtin && !a.builtin ? 1 : a.id.localeCompare(b.id)));
+
 	onOpenUrl((urls: string[]) => {
 		if (!urls[0].includes("installPlugin/")) return;
 		let id = urls[0].split("installPlugin/")[1];
@@ -271,10 +287,7 @@
 	});
 </script>
 
-<button
-	class="px-3 py-1 text-sm text-neutral-300 bg-neutral-700 hover:bg-neutral-600 transition-colors border border-neutral-600 rounded-lg"
-	on:click={() => (showPopup = true)}
->
+<button class="side-control" on:click={() => (showPopup = true)}>
 	{$t("plugin_manager.button")}
 </button>
 
@@ -290,85 +303,106 @@
 
 <Popup show={showPopup} label={$t("plugin_manager.title")}>
 	<svelte:fragment slot="header">
-		<button class="mr-2 my-1 float-right text-xl text-neutral-300" on:click={() => (showPopup = false)} aria-label={$t("settings.close")}>✕</button>
-		<h2 class="m-2 font-semibold text-xl text-neutral-300">{$t("plugin_manager.title")}</h2>
+		<button class="mr-2 my-1 float-right text-xl text-app-text" on:click={() => (showPopup = false)} aria-label={$t("settings.close")}>✕</button>
+		<h2 class="m-2 font-semibold text-xl text-app-text">{$t("plugin_manager.title")}</h2>
 	</svelte:fragment>
 
-	<h2 class="mx-2 mt-4 mb-2 text-lg text-neutral-400">{$t("plugin_manager.installed")}</h2>
-	<div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-		<!-- prettier-ignore -->
-		{#each installed.sort((a, b) =>
-			(a.builtin && !b.builtin) ? -1 :
-			(b.builtin && !a.builtin) ? 1 :
-			(a.has_settings_interface && !b.has_settings_interface) ? -1 :
-			(b.has_settings_interface && !a.has_settings_interface) ? 1 :
-			a.id.localeCompare(b.id)
-		) as plugin}
+	<h2 class="mx-2 mb-2 mt-4 text-lg text-app-muted">{$t("plugin_manager.installed")}</h2>
+	<div class="mx-2 mb-3 flex flex-row items-center gap-2 rounded-lg border border-app-border bg-app-panel px-2 py-2">
+		<MagnifyingGlass size={16} class="text-app-muted" />
+		<input
+			bind:value={query}
+			class="w-full bg-transparent p-1 text-sm text-app-text placeholder:text-app-muted"
+			placeholder={$t("plugin_manager.search")}
+			aria-label={$t("plugin_manager.search")}
+			type="search"
+			spellcheck="false"
+		/>
+	</div>
+	<div class="mx-2 mb-3 flex flex-row flex-wrap gap-2">
+		{#each filters as filter}
+			<button
+				class="rounded-full border border-app-border bg-app-elevated px-3 py-1 text-xs text-app-muted transition-colors"
+				class:border-app-accent={pluginFilter === filter}
+				class:text-app-accent={pluginFilter === filter}
+				on:click={() => (pluginFilter = filter)}
+			>
+				{$t(`plugin_manager.filter.${filter}`)}
+			</button>
+		{/each}
+	</div>
+	<div class="grid grid-cols-1 gap-1 md:grid-cols-2 lg:grid-cols-3">
+		{#each filteredInstalled as plugin}
 			<ListedPlugin
 				icon={getWebserverUrl(plugin.icon)}
-				name={($localisations && $localisations[plugin.id] && $localisations[plugin.id].Name) ? $localisations[plugin.id].Name : plugin.name}
+				name={$localisations && $localisations[plugin.id] && $localisations[plugin.id].Name ? $localisations[plugin.id].Name : plugin.name}
 				subtitle={plugin.version}
+				description={$localisations?.[plugin.id]?.Tooltip ?? ""}
 				disconnected={!plugin.registered}
 				action={() => {
 					if ($settings?.developer) invoke("reload_plugin", { id: plugin.id });
 					else removePlugin(plugin);
 				}}
-				actionLabel={$settings?.developer ? $t("plugin_manager.reload") : $t("plugin_manager.remove")}}
-				secondaryAction={!plugin.registered ? () => invoke("open_log_directory") : plugin.has_settings_interface ? () => invoke("show_settings_interface", { plugin: plugin.id }) : undefined}
-				secondaryActionLabel={!plugin.registered ? $t("plugin_manager.view_logs") : $t("plugin_manager.plugin_settings")}}
+				actionLabel={$settings?.developer ? $t("plugin_manager.reload") : $t("plugin_manager.uninstall")}
+				secondaryAction={!plugin.registered
+					? () => invoke("open_log_directory")
+					: plugin.has_settings_interface
+						? () => invoke("show_settings_interface", { plugin: plugin.id })
+						: undefined}
+				secondaryActionLabel={!plugin.registered ? $t("plugin_manager.view_logs") : $t("plugin_manager.plugin_settings")}
 				status={statuses[plugin.id]?.status ?? plugin.status ?? "running"}
 				exitCode={statuses[plugin.id]?.exit_code ?? null}
 			>
 				<svelte:fragment slot="subtitle">
-					{plugin.version}
+					<span class="font-mono">{plugin.version}</span>
+					{#if plugin.author}<span class="text-app-muted"> · {plugin.author}</span>{/if}
 					{#if availableUpdates[plugin.id]}
 						(<span class="text-yellow-400">
 							{$t("plugin_manager.available")}
-							<button
-								class="font-semibold underline"
-								on:click={() => openDetailsView = plugin.id.endsWith(".sdPlugin") ? plugin.id.slice(0, -9) : plugin.id}
-							>
+							<button class="font-semibold underline" on:click={() => (openDetailsView = plugin.id.endsWith(".sdPlugin") ? plugin.id.slice(0, -9) : plugin.id)}>
 								{availableUpdates[plugin.id]}
-							</button></span>)
+							</button></span
+						>)
 					{/if}
 				</svelte:fragment>
 
 				<svelte:fragment slot="secondary">
 					{#if !plugin.registered}
-						<WarningCircle size="24" class="text-yellow-500" />
+						<WarningCircle size={16} class="text-yellow-500" />
 					{:else if plugin.has_settings_interface}
-						<Gear size="24" class="text-green-600" />
+						<Gear size={16} class="text-app-success" />
 					{/if}
 				</svelte:fragment>
 
 				<svelte:fragment slot="controls">
 					<button
-						class="flex flex-row items-center justify-center p-1 text-neutral-300 hover:text-white"
+						class="flex flex-row items-center justify-center gap-1 rounded-lg border border-app-border bg-app-elevated px-2 py-1 text-xs text-app-text hover:text-app-accent"
 						on:click={() => void restartPlugin(plugin.id)}
 						aria-label={$t("plugin_manager.restart")}
 						title={$t("plugin_manager.restart")}
 					>
-						<ArrowClockwise size="18" />
+						<ArrowClockwise size={14} />
+						{$t("plugin_manager.restart")}
 					</button>
-					<label class="flex flex-row items-center space-x-1 text-xs text-neutral-400" title={$t("plugin_manager.auto_restart")}>
+					<label class="flex flex-row items-center space-x-1 text-xs text-app-muted" title={$t("plugin_manager.auto_restart")}>
 						<input type="checkbox" checked={plugin.auto_restart} on:change={(event) => void setAutoRestart(plugin.id, event.currentTarget.checked)} />
 						{$t("plugin_manager.auto_restart")}
 					</label>
 				</svelte:fragment>
 
 				{#if $settings?.developer}
-					<ArrowClockwise size="24" class="mt-2 text-neutral-400" />
+					<ArrowClockwise size={16} class="text-app-muted" />
 				{:else if !plugin.builtin}
-					<Trash size="24" class="mt-2 text-neutral-400" />
+					<Trash size={16} class="text-app-danger" />
 				{/if}
 			</ListedPlugin>
 		{/each}
 	</div>
 
 	<div class="flex flex-row justify-between items-center mx-2 mt-6 mb-2">
-		<h2 class="text-lg text-neutral-400">{$t("plugin_manager.store")}</h2>
+		<h2 class="text-lg text-app-muted">{$t("plugin_manager.store")}</h2>
 		<button
-			class="flex flex-row items-center mt-2 px-1 py-0.5 text-sm text-neutral-300 bg-neutral-700 hover:bg-neutral-600 transition-colors border border-neutral-600 rounded-lg"
+			class="flex flex-row items-center mt-2 px-1 py-0.5 text-sm text-app-text bg-app-panel hover:bg-app-border transition-colors border border-app-border rounded-lg"
 			on:click={installPluginFile}
 		>
 			<FileArrowUp />
@@ -383,23 +417,11 @@
 		</div>
 	</div>
 
-	<div class="flex flex-row items-center m-2 bg-neutral-700 border border-neutral-600 rounded-lg">
-		<MagnifyingGlass size="14" class="ml-3 mr-0.5 text-neutral-300" />
-		<input
-			bind:value={query}
-			class="w-full p-2 text-neutral-300"
-			placeholder={$t("plugin_manager.search")}
-			aria-label={$t("plugin_manager.search")}
-			type="search"
-			spellcheck="false"
-		/>
-	</div>
-
 	{#if !plugins}
-		<h2 class="mx-2 mt-6 mb-2 text-md text-neutral-400">{$t("plugin_manager.loading.open_source")}</h2>
+		<h2 class="mx-2 mt-6 mb-2 text-md text-app-muted">{$t("plugin_manager.loading.open_source")}</h2>
 	{:else}
 		<div class="flex flex-row items-center ml-2 mt-6 mb-2 space-x-2">
-			<h2 class="font-semibold text-md text-neutral-400">{$t("plugin_manager.open_source")}</h2>
+			<h2 class="font-semibold text-md text-app-muted">{$t("plugin_manager.open_source")}</h2>
 			<Tooltip>{$t("plugin_manager.open_source.tooltip")}</Tooltip>
 		</div>
 		<div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -421,19 +443,19 @@
 						</span>
 					</svelte:fragment>
 
-					<ArrowSquareOut size="24" class="text-neutral-400" />
+					<ArrowSquareOut size="24" class="text-app-muted" />
 				</ListedPlugin>
 			{/each}
 		</div>
 	{/if}
 
 	<div class="flex flex-row items-center mt-6 mb-2">
-		<h2 class="mx-2 font-semibold text-md text-neutral-400">{$t("plugin_manager.elgato")}</h2>
+		<h2 class="mx-2 font-semibold text-md text-app-muted">{$t("plugin_manager.elgato")}</h2>
 		<Tooltip>{$t("plugin_manager.elgato.tooltip")}</Tooltip>
 	</div>
 	{#if !showArchive}
 		<button
-			class="ml-2 mt-2 mb-2 px-2 py-1 text-sm text-neutral-300 bg-neutral-700 hover:bg-neutral-600 transition-colors border border-neutral-600 rounded-lg"
+			class="ml-2 mt-2 mb-2 px-2 py-1 text-sm text-app-text bg-app-panel hover:bg-app-border transition-colors border border-app-border rounded-lg"
 			on:click={async () => {
 				showArchive = true;
 				archivePlugins = await (await fetch("https://plugins.amankhanna.me/catalogue.json")).json();
@@ -442,7 +464,7 @@
 			{$t("plugin_manager.elgato.load")}
 		</button>
 	{:else if !archivePlugins}
-		<h2 class="mx-2 mt-4 mb-2 text-md text-neutral-400">{$t("plugin_manager.loading.elgato")}</h2>
+		<h2 class="mx-2 mt-4 mb-2 text-md text-app-muted">{$t("plugin_manager.loading.elgato")}</h2>
 	{:else}
 		<div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 			{#each archivePlugins as plugin}
@@ -454,7 +476,7 @@
 					action={() => installPluginElgato(plugin)}
 					actionLabel={$t("plugin_details.install")}
 				>
-					<CloudArrowDown size="24" class="text-neutral-400" />
+					<CloudArrowDown size="24" class="text-app-muted" />
 				</ListedPlugin>
 			{/each}
 		</div>
@@ -462,7 +484,7 @@
 
 	{#if "Tacto Connect".toLowerCase().includes(query.toLowerCase())}
 		<div class="flex flex-row items-center mt-6 mb-2">
-			<h2 class="mx-2 font-semibold text-md text-neutral-400">Tacto</h2>
+			<h2 class="mx-2 font-semibold text-md text-app-muted">Tacto</h2>
 			<Tooltip>{$t("plugin_manager.tacto.tooltip")}</Tooltip>
 		</div>
 		<div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -483,10 +505,10 @@
 				secondaryActionLabel={$t("plugin_manager.visit_website")}
 			>
 				<svelte:fragment slot="secondary">
-					<ArrowSquareOut size="24" class="text-neutral-400" />
+					<ArrowSquareOut size="24" class="text-app-muted" />
 				</svelte:fragment>
 
-				<CloudArrowDown size="24" class="mt-2 text-neutral-400" />
+				<CloudArrowDown size="24" class="mt-2 text-app-muted" />
 			</ListedPlugin>
 		</div>
 	{/if}
@@ -506,18 +528,18 @@
 
 {#if choices}
 	<div
-		class="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 mt-2 p-2 w-96 text-xs text-neutral-300 bg-neutral-700 border border-neutral-600 rounded-lg z-40"
+		class="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 mt-2 p-2 w-96 text-xs text-app-text bg-app-panel border border-app-border rounded-lg z-40"
 	>
 		<h3 class="mb-2 font-semibold text-lg text-center">{$t("plugin_manager.choose_asset")}</h3>
 		<div class="select-wrapper">
-			<select class="w-full bg-neutral-800!" bind:value={choice} aria-label={$t("plugin_manager.choose_asset.label")}>
+			<select class="w-full bg-app-elevated!" bind:value={choice} aria-label={$t("plugin_manager.choose_asset.label")}>
 				{#each choices as choice, i}
 					<option value={i}>{choice.name}</option>
 				{/each}
 			</select>
 		</div>
 		<button
-			class="mt-2 p-1 w-full text-sm text-neutral-300 bg-neutral-800 hover:bg-neutral-900 transition-colors border border-neutral-600 rounded-lg"
+			class="mt-2 p-1 w-full text-sm text-app-text bg-app-elevated hover:bg-app-panel transition-colors border border-app-border rounded-lg"
 			on:click={finishChoice}
 		>
 			{$t("plugin_details.install")}

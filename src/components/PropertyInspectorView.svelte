@@ -188,11 +188,14 @@
 	}}
 />
 
-<div class="grow min-h-64 max-h-96 overflow-auto bg-neutral-800 border-t border-neutral-700" bind:this={iframeContainer}>
+{#if instances.length > 0}
+	<div class="border-b border-app-border bg-app-panel px-4 py-2 text-xs font-semibold text-app-muted">{$t("property_inspector.title")}</div>
+{/if}
+<div class="max-h-96 min-h-64 grow overflow-auto border-t border-app-border bg-app-panel" bind:this={iframeContainer}>
 	<button
 		bind:this={iframeClosePopup}
 		on:click={() => closePopup(iframePopupsOpen[iframePopupsOpen.length - 1])}
-		class="absolute top-2 right-2 text-2xl text-neutral-300 font-bold hidden"
+		class="absolute right-2 top-2 hidden text-2xl font-bold text-app-text"
 	>
 		✕
 	</button>

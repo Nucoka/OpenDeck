@@ -75,9 +75,6 @@
 		}
 	}
 
-	$: overflowsX = Math.max(device.columns, device.encoders, device.touchpoints) > 8;
-	$: overflowsY = device.rows + Math.min(device.encoders, 1) + Math.min(device.touchpoints, 1) > 4;
-
 	// Grid navigation: track focused cell and compute row lengths for arrow key movement.
 	let focusedRow = 0;
 	let focusedCol = 0;
@@ -162,12 +159,9 @@
 {#key device}
 	<span id="grid-description" class="sr-only">{$t("device_view.grid_description")}</span>
 	<div
-		class="flex flex-col justify-center grow px-16 py-6 overflow-auto"
+		class="flex flex-col justify-center grow overflow-hidden px-8 py-6"
 		class:items-center={device.columns <= 9}
 		class:hidden={$inspectedParentAction || selectedDevice != device.id}
-		class:device-fade-x={overflowsX && !overflowsY}
-		class:device-fade-y={overflowsY && !overflowsX}
-		class:device-fade-xy={overflowsX && overflowsY}
 		role="grid"
 		aria-label={device.name}
 		aria-describedby="grid-description"
@@ -177,90 +171,83 @@
 		on:keydown|capture={handleGridKeydown}
 		on:focusin={handleGridFocusin}
 	>
-		<div class="flex flex-col" role="rowgroup">
-			{#each { length: device.rows } as _, r}
-				<div class="flex flex-row" role="row">
-					{#each { length: device.columns } as _, c}
+		<div style:zoom={device.columns > 10 ? 0.6 : device.columns > 8 ? 0.75 : device.columns > 6 ? 0.9 : 1}>
+			<div class="rounded-2xl border border-app-border bg-app-panel p-4" role="presentation">
+				<div class="flex flex-col" role="rowgroup">
+					{#each { length: device.rows } as _, r}
+						<div class="flex flex-row" role="row">
+							{#each { length: device.columns } as _, c}
+								<Key
+									context={{ device: device.id, profile: profile.id, controller: "Keypad", position: r * device.columns + c }}
+									bind:inslot={profile.keys[r * device.columns + c]}
+									on:dragover={handleDragOver}
+									on:drop={(event) => handleDrop(event, "Keypad", r * device.columns + c)}
+									on:dragstart={(event) => handleDragStart(event, "Keypad", r * device.columns + c)}
+									{handlePaste}
+									size={device.id.startsWith("sd-") && device.rows == 4 && device.columns == 8 ? 192 : 144}
+									label="{$t('device_view.key')} {String.fromCharCode(65 + r)}{c + 1}"
+									tabindex={focusedRow === r && focusedCol === c ? 0 : -1}
+								/>
+							{/each}
+						</div>
+					{/each}
+				</div>
+			</div>
+
+			{#if device.encoders > 0}
+				<div class="mt-4 flex flex-row justify-between rounded-2xl border border-app-border bg-app-panel p-4" role="row" style={`width: ${keypadRowWidth}px;`}>
+					{#each { length: device.encoders } as _, i}
 						<Key
-							context={{ device: device.id, profile: profile.id, controller: "Keypad", position: r * device.columns + c }}
-							bind:inslot={profile.keys[r * device.columns + c]}
+							context={{ device: device.id, profile: profile.id, controller: "Encoder", position: i }}
+							bind:inslot={profile.sliders[i]}
 							on:dragover={handleDragOver}
-							on:drop={(event) => handleDrop(event, "Keypad", r * device.columns + c)}
-							on:dragstart={(event) => handleDragStart(event, "Keypad", r * device.columns + c)}
+							on:drop={(event) => handleDrop(event, "Encoder", i)}
+							on:dragstart={(event) => handleDragStart(event, "Encoder", i)}
 							{handlePaste}
 							size={device.id.startsWith("sd-") && device.rows == 4 && device.columns == 8 ? 192 : 144}
-							label="{$t('device_view.key')} {String.fromCharCode(65 + r)}{c + 1}"
-							tabindex={focusedRow === r && focusedCol === c ? 0 : -1}
+							label="{$t('device_view.encoder')} {i + 1}"
+							tabindex={focusedRow === encoderRowIndex && focusedCol === i ? 0 : -1}
 						/>
 					{/each}
 				</div>
-			{/each}
-		</div>
+			{/if}
 
-		<div class="flex flex-row justify-between" role="row" style={`width: ${keypadRowWidth}px;`}>
-			{#each { length: device.encoders } as _, i}
-				<Key
-					context={{ device: device.id, profile: profile.id, controller: "Encoder", position: i }}
-					bind:inslot={profile.sliders[i]}
-					on:dragover={handleDragOver}
-					on:drop={(event) => handleDrop(event, "Encoder", i)}
-					on:dragstart={(event) => handleDragStart(event, "Encoder", i)}
-					{handlePaste}
-					size={device.id.startsWith("sd-") && device.rows == 4 && device.columns == 8 ? 192 : 144}
-					label="{$t('device_view.encoder')} {i + 1}"
-					tabindex={focusedRow === encoderRowIndex && focusedCol === i ? 0 : -1}
-				/>
-			{/each}
-		</div>
-
-		<div class="flex flex-row items-center" role="row">
-			{#each { length: device.touchpoints } as _, i}
-				<!-- On the Stream Deck Neo, the infobar display sits physically between the two touchpoints. -->
-				{#if device.infobars > 0 && i === 1}
-					{#each { length: device.infobars } as _, j}
-						<div class="px-3.5 py-[3.5px]">
-							<Key
-								context={{ device: device.id, profile: profile.id, controller: "Infobar", position: j }}
-								bind:inslot={profile.infobars[j]}
-								on:dragover={handleDragOver}
-								on:drop={(event) => handleDrop(event, "Infobar", j)}
-								on:dragstart={(event) => handleDragStart(event, "Infobar", j)}
-								{handlePaste}
-								size={device.id.startsWith("sd-") && device.rows == 4 && device.columns == 8 ? 192 : 144}
-								width={248}
-								height={58}
-							/>
-						</div>
+			{#if device.touchpoints > 0}
+				<div class="mt-4 flex flex-row items-center rounded-2xl border border-app-border bg-app-panel p-4" role="row">
+					{#each { length: device.touchpoints } as _, i}
+						<!-- On the Stream Deck Neo, the infobar display sits physically between the two touchpoints. -->
+						{#if device.infobars > 0 && i === 1}
+							{#each { length: device.infobars } as _, j}
+								<div class="px-3.5 py-[3.5px]">
+									<Key
+										context={{ device: device.id, profile: profile.id, controller: "Infobar", position: j }}
+										bind:inslot={profile.infobars[j]}
+										on:dragover={handleDragOver}
+										on:drop={(event) => handleDrop(event, "Infobar", j)}
+										on:dragstart={(event) => handleDragStart(event, "Infobar", j)}
+										{handlePaste}
+										size={device.id.startsWith("sd-") && device.rows == 4 && device.columns == 8 ? 192 : 144}
+										width={248}
+										height={58}
+									/>
+								</div>
+							{/each}
+						{/if}
+						<Key
+							context={{ device: device.id, profile: profile.id, controller: "Keypad", position: device.rows * device.columns + i }}
+							bind:inslot={profile.keys[device.rows * device.columns + i]}
+							on:dragover={handleDragOver}
+							on:drop={(event) => handleDrop(event, "Keypad", device.rows * device.columns + i)}
+							on:dragstart={(event) => handleDragStart(event, "Keypad", device.rows * device.columns + i)}
+							{handlePaste}
+							size={device.id.startsWith("sd-") && device.rows == 4 && device.columns == 8 ? 192 : 144}
+							isTouchPoint
+							label="{$t('device_view.touchpoint')} {i + 1}"
+							tabindex={focusedRow === touchpointRowIndex && focusedCol === i ? 0 : -1}
+						/>
 					{/each}
-				{/if}
-				<Key
-					context={{ device: device.id, profile: profile.id, controller: "Keypad", position: device.rows * device.columns + i }}
-					bind:inslot={profile.keys[device.rows * device.columns + i]}
-					on:dragover={handleDragOver}
-					on:drop={(event) => handleDrop(event, "Keypad", device.rows * device.columns + i)}
-					on:dragstart={(event) => handleDragStart(event, "Keypad", device.rows * device.columns + i)}
-					{handlePaste}
-					size={device.id.startsWith("sd-") && device.rows == 4 && device.columns == 8 ? 192 : 144}
-					isTouchPoint
-					label="{$t('device_view.touchpoint')} {i + 1}"
-					tabindex={focusedRow === touchpointRowIndex && focusedCol === i ? 0 : -1}
-				/>
-			{/each}
+				</div>
+			{/if}
 		</div>
 	</div>
 {/key}
-
-<style>
-	.device-fade-x {
-		mask-image: linear-gradient(to right, transparent, black 7.5rem, black calc(100% - 7.5rem), transparent);
-	}
-	.device-fade-y {
-		mask-image: linear-gradient(to bottom, transparent, black 7.5rem, black calc(100% - 7.5rem), transparent);
-	}
-	.device-fade-xy {
-		mask-image:
-			linear-gradient(to right, transparent, black 7.5rem, black calc(100% - 7.5rem), transparent),
-			linear-gradient(to bottom, transparent, black 7.5rem, black calc(100% - 7.5rem), transparent);
-		mask-composite: intersect;
-	}
-</style>

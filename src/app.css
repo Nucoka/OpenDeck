@@ -4,6 +4,37 @@
 @import "tailwindcss/preflight.css";
 @import "tailwindcss/utilities.css";
 
+@theme {
+	--color-app-bg: #111113;
+	--color-app-panel: #171719;
+	--color-app-elevated: #202024;
+	--color-app-border: #2d2d33;
+	--color-app-text: #e7e7ea;
+	--color-app-muted: #90909a;
+	--color-app-accent: #8b6cff;
+	--color-app-accent-soft: #272142;
+	--color-app-success: #35d399;
+	--color-app-danger: #f87171;
+}
+
+body {
+	font-family: "Open Sans", "Liberation Sans", sans-serif;
+}
+
+::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+
+::-webkit-scrollbar-track {
+	background: var(--color-app-bg);
+}
+
+::-webkit-scrollbar-thumb {
+	background: var(--color-app-border);
+	border-radius: 8px;
+}
+
 *,
 ::after,
 ::before,
@@ -164,4 +195,45 @@ input[type="color"] {
 }
 .plugin-readme .markdown-alert-caution > .markdown-alert-title {
 	color: #e5534b;
+}
+
+.side-row {
+	@apply flex h-10 min-w-0 items-center gap-3 rounded-lg px-3 text-sm text-app-muted transition-colors;
+}
+
+.side-row:hover {
+	@apply bg-app-elevated text-app-text;
+}
+
+.side-row-active,
+.side-row-active:hover {
+	@apply bg-app-accent-soft text-app-accent;
+}
+
+.side-row select {
+	@apply min-w-0 appearance-none bg-transparent text-sm font-semibold text-app-text;
+}
+
+.side-row .select-profile-wrapper select {
+	@apply font-normal text-app-muted;
+}
+
+.side-row .select-device-wrapper::after {
+	@apply right-1 border-app-accent;
+}
+
+.side-row .select-profile-wrapper::after {
+	@apply right-1 border-app-muted;
+}
+
+.side-control {
+	@apply flex h-full w-full items-center bg-transparent p-0 text-left text-sm text-inherit;
+}
+
+.device-chip {
+	@apply flex items-center gap-2 rounded-full border border-app-border bg-app-elevated px-3 py-1 text-xs text-app-text;
+}
+
+.header-button {
+	@apply flex items-center gap-2 rounded-lg border border-app-border bg-app-elevated px-3 py-1.5 text-xs text-app-text transition-colors hover:border-app-accent hover:text-app-accent;
 }

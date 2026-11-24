@@ -195,12 +195,12 @@
 <div class="relative" style={`transform: scale(${(112 /* desired inner size */ / size) * scale});`}>
 	<canvas
 		bind:this={canvas}
-		class="relative border-3 border-neutral-700 rounded-3xl outline-none outline-offset-2 outline-blue-500"
+		class="relative border-2 border-app-border rounded-xl outline-none outline-offset-2 outline-app-accent"
 		style={`margin: ${-((size + 3 * 2 /* border */ - 132) /* desired outer size */ / 2)}px;`}
 		class:outline-solid={active && ((slot && $inspectedInstance == slot.context) || (context && $inspectedInstance == context))}
 		class:rounded-full!={context?.controller == "Encoder"}
 		class:rounded-lg!={context?.controller == "Infobar"}
-		class:bg-black={slot != null}
+		class:bg-app-bg={slot != null}
 		{width}
 		{height}
 		draggable={slot != null}
@@ -229,18 +229,18 @@
 		on:contextmenu={contextMenu}
 	/>
 	{#if isTouchPoint && !slot}
-		<div class="absolute left-1/4 top-1/2 w-1/2 border-t-4 border-neutral-700 pointer-events-none"></div>
+		<div class="absolute left-1/4 top-1/2 w-1/2 border-t-4 border-app-border pointer-events-none"></div>
 	{/if}
 </div>
 
 {#if $openContextMenu && $openContextMenu?.context == context}
 	<div
 		bind:this={contextMenuEl}
-		class="absolute w-32 font-semibold text-sm text-neutral-300 bg-neutral-700 border border-neutral-600 rounded-lg divide-y divide-neutral-600! z-10"
+		class="absolute w-32 font-semibold text-sm text-app-text bg-app-elevated border border-app-border rounded-lg divide-y divide-app-border! z-10"
 		style={`left: ${$openContextMenu.x}px; top: ${$openContextMenu.y}px;`}
 	>
 		{#if !slot}
-			<button class="flex flex-row items-center w-full p-2 hover:bg-neutral-600 transition-colors rounded-lg cursor-pointer" on:click|stopPropagation={paste}>
+			<button class="flex flex-row items-center w-full p-2 hover:bg-app-border transition-colors rounded-lg cursor-pointer" on:click|stopPropagation={paste}>
 				<Clipboard size="18" class="text-neutral-300" />
 				<span class="ml-2">{$t("key.paste")}</span>
 			</button>

@@ -64,16 +64,18 @@
 	}}
 />
 
-<div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 p-2 text-neutral-300 bg-neutral-700 border border-neutral-600 rounded-lg z-10">
+<div
+	class="absolute left-1/2 top-1/2 max-h-[90vh] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded-2xl border border-app-border bg-app-elevated p-4 text-app-text shadow-2xl z-20"
+>
 	<div class="flex flex-row">
 		<div class="select-wrapper m-1 w-full">
-			<select class="w-full bg-neutral-600! border-neutral-500!" bind:value={state} aria-label={$t("instance_editor.state")}>
+			<select class="w-full bg-app-elevated! border-app-border!" bind:value={state} aria-label={$t("instance_editor.state")}>
 				{#each instance.states as _, i}
 					<option value={i}>{$t("instance_editor.state.n", { n: i + 1 })}</option>
 				{/each}
 			</select>
 		</div>
-		<button class="ml-2 mr-1 float-right text-xl text-neutral-300" on:click={() => (showEditor = false)} aria-label={$t("settings.close")}>✕</button>
+		<button class="ml-2 mr-1 float-right text-xl text-app-text" on:click={() => (showEditor = false)} aria-label={$t("settings.close")}>✕</button>
 	</div>
 	<div class="flex flex-row mx-1">
 		<div class="flex flex-col justify-center items-center mt-2 mb-1">
@@ -99,17 +101,17 @@
 			>
 				<canvas
 					bind:this={canvas}
-					class="bg-black border border-neutral-600 rounded-xl cursor-pointer"
+					class="bg-app-bg border border-app-border rounded-lg cursor-pointer"
 					width={144}
 					height={144}
 					style={`transform: scale(${128 / 144}); margin: ${(128 - 144) / 2}px;`}
 					aria-label={$t("instance_editor.image.n", { n: state + 1 })}
 				/>
 			</button>
-			<div class="flex flex-row items-center justify-center mt-1 space-x-1 text-neutral-300">
+			<div class="flex flex-row items-center justify-center mt-1 space-x-1 text-app-text">
 				<button
 					on:click={() => adjustImageScale(-10)}
-					class="w-6 h-6 text-sm bg-neutral-600 hover:bg-neutral-500 transition-colors border border-neutral-500 rounded-md"
+					class="w-6 h-6 text-sm bg-app-elevated hover:bg-app-border transition-colors border border-app-border rounded-md"
 					title={$t("instance_editor.image.scale.decrease")}
 					aria-label={$t("instance_editor.image.scale.decrease")}
 				>
@@ -120,7 +122,7 @@
 				</span>
 				<button
 					on:click={() => adjustImageScale(10)}
-					class="w-6 h-6 text-sm bg-neutral-600 hover:bg-neutral-500 transition-colors border border-neutral-500 rounded-md"
+					class="w-6 h-6 text-sm bg-app-elevated hover:bg-app-border transition-colors border border-app-border rounded-md"
 					title={$t("instance_editor.image.scale.increase")}
 					aria-label={$t("instance_editor.image.scale.increase")}
 				>
@@ -141,7 +143,7 @@
 				on:mouseleave={() => {
 					if (navigator.userAgent.toLowerCase().includes("mac")) backgroundColourInput.className = "absolute invisible w-0 h-0";
 				}}
-				class="mt-1 px-0.5 text-sm text-neutral-300 bg-neutral-600 hover:bg-neutral-500 transition-colors border border-neutral-500 rounded-lg"
+				class="mt-1 px-0.5 text-sm text-app-text bg-app-elevated hover:bg-app-border transition-colors border border-app-border rounded-lg"
 			>
 				{$t("instance_editor.background")}
 				<input bind:this={backgroundColourInput} type="color" bind:value={instance.states[state].background_colour} class="absolute invisible w-0 h-0" />
@@ -160,7 +162,7 @@
 				on:mouseleave={() => {
 					if (navigator.userAgent.toLowerCase().includes("mac")) solidColourInput.className = "absolute invisible w-0 h-0";
 				}}
-				class="mt-1 px-0.5 text-sm text-neutral-300 bg-neutral-600 hover:bg-neutral-500 transition-colors border border-neutral-500 rounded-lg"
+				class="mt-1 px-0.5 text-sm text-app-text bg-app-elevated hover:bg-app-border transition-colors border border-app-border rounded-lg"
 			>
 				{$t("instance_editor.solid_colour")}
 				<input
@@ -210,7 +212,7 @@
 					bind:value={instance.states[state].text_override}
 					placeholder={instance.states[state].text}
 					rows="1"
-					class="w-full px-1 text-neutral-300 bg-neutral-600 border border-neutral-500 rounded-lg resize-none"
+					class="w-full px-1 text-app-text bg-app-elevated border border-app-border rounded-lg resize-none"
 					id="editor-text"
 				/>
 			</div>
@@ -219,7 +221,7 @@
 				<input
 					type="color"
 					bind:value={instance.states[state].colour}
-					class="mr-2 px-0.5 bg-neutral-600 border border-neutral-500 rounded-lg"
+					class="mr-2 px-0.5 bg-app-elevated border border-app-border rounded-lg"
 					id="editor-colour"
 				/>
 				<label for="editor-show" class="mr-2">{$t("instance_editor.show")}</label>
@@ -235,14 +237,14 @@
 				<input
 					type="color"
 					bind:value={instance.states[state].stroke_colour}
-					class="mr-2 px-0.5 bg-neutral-600 border border-neutral-500 rounded-lg"
+					class="mr-2 px-0.5 bg-app-elevated border border-app-border rounded-lg"
 					id="editor-stroke"
 				/>
 				<label for="editor-outline" class="mr-2">{$t("instance_editor.outline")}</label>
 				<input
 					type="number"
 					bind:value={instance.states[state].stroke_size}
-					class="px-0.5 w-14 text-neutral-300 bg-neutral-600 border border-neutral-500 rounded-lg"
+					class="px-0.5 w-14 text-app-text bg-app-elevated border border-app-border rounded-lg"
 					id="editor-outline"
 				/>
 			</div>
@@ -252,7 +254,7 @@
 					list="families"
 					bind:value={instance.states[state].family}
 					placeholder={$t("instance_editor.font.placeholder")}
-					class="w-full px-1 text-neutral-300 bg-neutral-600 border border-neutral-500 rounded-lg"
+					class="w-full px-1 text-app-text bg-app-elevated border border-app-border rounded-lg"
 					id="editor-font"
 				/>
 				<datalist id="families">
@@ -294,7 +296,7 @@
 				<input
 					type="number"
 					bind:value={instance.states[state].size}
-					class="px-0.5 w-14 text-neutral-300 bg-neutral-600 border border-neutral-500 rounded-lg"
+					class="px-0.5 w-14 text-app-text bg-app-elevated border border-app-border rounded-lg"
 					id="editor-size"
 				/>
 			</div>

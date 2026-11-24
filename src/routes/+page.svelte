@@ -5,7 +5,15 @@
 	import { t } from "$lib/i18n";
 	import { initPortBase } from "$lib/ports";
 	import { inspectedParentAction } from "$lib/propertyInspector";
+	import { settings } from "$lib/settings";
 	import { actionList, deviceSelector, profileManager } from "$lib/singletons";
+
+	import Diamond from "phosphor-svelte/lib/Diamond";
+	import Gear from "phosphor-svelte/lib/Gear";
+	import ImageSquare from "phosphor-svelte/lib/ImageSquare";
+	import Plug from "phosphor-svelte/lib/Plug";
+	import SquaresFour from "phosphor-svelte/lib/SquaresFour";
+	import UserCircle from "phosphor-svelte/lib/UserCircle";
 
 	import ActionList from "../components/ActionList.svelte";
 	import DeviceSelector from "../components/DeviceSelector.svelte";
@@ -28,50 +36,84 @@
 
 <svelte:window on:dragover={(event) => event.preventDefault()} on:drop={(event) => event.preventDefault()} />
 
-<div class="flex flex-row h-screen">
-	<div class="flex flex-col grow min-w-0">
-		<nav class="flex flex-row justify-between items-center p-3" class:hidden={$inspectedParentAction}>
-			<div class="flex flex-col items-start space-y-1">
+<div class="flex h-screen flex-row bg-app-bg text-app-text">
+	<aside class="flex w-44 shrink-0 flex-col border-r border-app-border bg-app-panel" class:hidden={$inspectedParentAction}>
+		<div class="flex h-14 items-center gap-2 border-b border-app-border px-4">
+			<Diamond size={18} weight="fill" class="text-app-accent" />
+			<span class="text-sm font-semibold tracking-wide">OpenDeck</span>
+		</div>
+
+		<nav class="flex flex-col gap-1 p-2" aria-label={$t("settings.button")}>
+			<div class="side-row side-row-active">
+				<SquaresFour size={20} />
 				<DeviceSelector bind:devices bind:value={selectedDevice} bind:selectedProfiles bind:this={$deviceSelector} />
+			</div>
+			<div class="side-row">
+				<Plug size={20} />
+				<PluginManager />
+			</div>
+			<div class="side-row">
+				<UserCircle size={20} />
 				{#key selectedDevice}
 					{#if selectedDevice && devices[selectedDevice]}
 						<ProfileManager bind:device={devices[selectedDevice]} bind:profile={selectedProfiles[selectedDevice]} bind:this={$profileManager} />
 					{/if}
 				{/key}
 			</div>
+			<div class="side-row">
+				<Gear size={20} />
+				<SettingsView />
+			</div>
+		</nav>
+	</aside>
 
-			<div class="flex flex-row items-center space-x-2" class:mr-4={Object.keys(devices).length > 0}>
+	<div class="flex min-w-0 grow flex-col">
+		<header class="flex h-14 shrink-0 items-center justify-between border-b border-app-border bg-app-bg px-6" class:hidden={$inspectedParentAction}>
+			<div class="flex items-center gap-3">
+				{#if selectedDevice && devices[selectedDevice]}
+					<div class="device-chip" title={devices[selectedDevice].id}>
+						<span class="size-2 rounded-full bg-app-success" aria-hidden="true" />
+						<span>{devices[selectedDevice].name}</span>
+					</div>
+				{/if}
+			</div>
+
+			<div class="flex items-center gap-4">
+				{#if $settings}
+					<label class="flex items-center gap-2 text-xs text-app-muted" for="header-brightness">
+						{$t("settings.brightness")}
+						<input id="header-brightness" type="range" min="0" max="100" bind:value={$settings.brightness} class="w-28 accent-app-accent" />
+					</label>
+				{/if}
 				{#if selectedDevice && devices[selectedDevice] && selectedProfiles[selectedDevice]}
-					<button
-						class="px-3 py-1 text-sm text-neutral-300 bg-neutral-700 hover:bg-neutral-600 transition-colors border border-neutral-600 rounded-lg"
-						on:click={() => (showPhotoWall = true)}
-					>
+					<button class="header-button" on:click={() => (showPhotoWall = true)}>
+						<ImageSquare size={16} />
 						{$t("photo_wall.button")}
 					</button>
 					<PhotoWall bind:show={showPhotoWall} bind:profile={selectedProfiles[selectedDevice]} device={devices[selectedDevice]} />
 				{/if}
-				<PluginManager />
-				<SettingsView />
 			</div>
-		</nav>
+		</header>
 
-		{#if Object.keys(devices).length > 0 && selectedProfiles}
-			{#if $inspectedParentAction}
-				<ParentActionView bind:profile={selectedProfiles[selectedDevice]} />
-			{/if}
-
-			{#each Object.entries(devices) as [id, device]}
-				{#if device && selectedProfiles[id]}
-					<DeviceView bind:device bind:profile={selectedProfiles[id]} bind:selectedDevice />
+		<main class="min-h-0 grow">
+			{#if Object.keys(devices).length > 0 && selectedProfiles}
+				{#if $inspectedParentAction}
+					<ParentActionView bind:profile={selectedProfiles[selectedDevice]} />
 				{/if}
-			{/each}
 
-			{#if selectedProfiles[selectedDevice]}
-				<PropertyInspectorView bind:device={devices[selectedDevice]} bind:profile={selectedProfiles[selectedDevice]} />
+				{#each Object.entries(devices) as [id, device]}
+					{#if device && selectedProfiles[id]}
+						<DeviceView bind:device bind:profile={selectedProfiles[id]} bind:selectedDevice />
+					{/if}
+				{/each}
+
+				{#if selectedProfiles[selectedDevice]}
+					<PropertyInspectorView bind:device={devices[selectedDevice]} bind:profile={selectedProfiles[selectedDevice]} />
+				{/if}
+			{:else}
+				<NoDevicesDetected />
 			{/if}
-		{:else}
-			<NoDevicesDetected />
-		{/if}
+		</main>
 	</div>
 
 	<ActionList bind:this={$actionList} />
