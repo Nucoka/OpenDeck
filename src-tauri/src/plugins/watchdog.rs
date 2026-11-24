@@ -174,11 +174,11 @@ async fn handle_crash(id: String, generation: u64, exit_code: Option<i32>) {
 	let delay = RESTART_DELAYS_SECS[(attempts - 1) as usize];
 	tokio::spawn(async move {
 		tokio::time::sleep(Duration::from_secs(delay)).await;
-		restart(&id, false).await;
+		restart_inner(&id).await;
 	});
 }
 
-pub async fn restart(id: &str, reset_attempts: bool) {
+async fn restart_inner(id: &str) {
 	if SHUTDOWN.load(Ordering::Relaxed) || !crate::shared::config_dir().join("plugins").join(id).exists() {
 		return;
 	}
@@ -198,9 +198,6 @@ pub async fn restart(id: &str, reset_attempts: bool) {
 			},
 		});
 		entry.generation = generation;
-		if reset_attempts {
-			entry.attempts = 0;
-		}
 		entry.status.status = "restarting".to_owned();
 		entry.status.attempts = entry.attempts;
 		entry.status.exit_code = None;
@@ -208,8 +205,20 @@ pub async fn restart(id: &str, reset_attempts: bool) {
 	emit(&get_status(id));
 
 	crate::events::clear_plugin_queue(id).await;
-	if let Some(app) = crate::APP_HANDLE.get() {
-		crate::events::frontend::plugins::reload_plugin(app.clone(), id.to_owned()).await;
+	let Some(app) = crate::APP_HANDLE.get() else {
+		return;
+	};
+	let _ = crate::plugins::deactivate_plugin(app, id).await;
+	let tx = (*app.state::<std::sync::mpsc::Sender<crate::plugins::SpawnRequest>>()).clone();
+	let _ = crate::plugins::initialise_plugin(crate::shared::config_dir().join("plugins").join(id), tx).await;
+
+	{
+		let locks = crate::store::profiles::acquire_locks().await;
+		for context in locks.profile_stores.all_from_plugin(id) {
+			if let Ok(Some(instance)) = crate::store::profiles::get_instance(&context, &locks).await {
+				let _ = crate::events::outbound::will_appear::will_appear(instance).await;
+			}
+		}
 	}
 
 	{
@@ -219,6 +228,20 @@ pub async fn restart(id: &str, reset_attempts: bool) {
 		}
 	}
 	emit(&get_status(id));
+	if let Some(window) = app.get_webview_window("main") {
+		let _ = window.emit("plugin_reloaded", id);
+	}
+}
+
+pub async fn restart(id: &str) {
+	{
+		let mut map = states();
+		if let Some(entry) = map.get_mut(id) {
+			entry.attempts = 0;
+			entry.status.attempts = 0;
+		}
+	}
+	restart_inner(id).await;
 }
 
 pub fn start_monitor() {

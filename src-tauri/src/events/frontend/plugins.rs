@@ -2,11 +2,11 @@ use super::Error;
 
 use crate::plugins::{SpawnRequest, deactivate_plugin, initialise_plugin};
 use crate::shared::{config_dir, log_dir};
-use crate::store::profiles::{acquire_locks, get_instance};
+use crate::store::profiles::acquire_locks;
 
 use std::sync::mpsc;
 
-use tauri::{AppHandle, Emitter, Manager, command};
+use tauri::{AppHandle, Manager, command};
 use tokio::fs;
 
 #[derive(serde::Serialize)]
@@ -160,22 +160,8 @@ pub async fn remove_plugin(app: AppHandle, id: String) -> Result<(), Error> {
 
 #[command]
 pub async fn reload_plugin(app: AppHandle, id: String) {
-	let _ = deactivate_plugin(&app, &id).await;
-	let tx = (*app.state::<mpsc::Sender<SpawnRequest>>()).clone();
-	let _ = initialise_plugin(config_dir().join("plugins").join(&id), tx).await;
-
-	let locks = acquire_locks().await;
-	let all = locks.profile_stores.all_from_plugin(&id);
-
-	for context in all {
-		if let Ok(Some(instance)) = get_instance(&context, &locks).await {
-			let _ = crate::events::outbound::will_appear::will_appear(instance).await;
-		}
-	}
-
-	if let Some(window) = app.get_webview_window("main") {
-		let _ = window.emit("plugin_reloaded", &id);
-	}
+	let _ = app;
+	crate::plugins::watchdog::restart(&id).await;
 }
 
 #[command]
@@ -186,7 +172,7 @@ pub async fn show_settings_interface(plugin: String) -> Result<(), Error> {
 
 #[command]
 pub async fn restart_plugin(id: String) {
-	crate::plugins::watchdog::restart(&id, true).await;
+	crate::plugins::watchdog::restart(&id).await;
 }
 
 #[command]

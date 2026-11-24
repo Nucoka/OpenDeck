@@ -19,15 +19,53 @@
 	import { actionList, deviceSelector, PRODUCT_NAME } from "$lib/singletons";
 
 	import { invoke } from "@tauri-apps/api/core";
+	import { listen } from "@tauri-apps/api/event";
 	import { onOpenUrl } from "@tauri-apps/plugin-deep-link";
 	import { ask, message, open } from "@tauri-apps/plugin-dialog";
+	import { onDestroy } from "svelte";
 
 	// @ts-expect-error
 	const fetch = window.fetchNative ?? window.fetch;
 
+	type PluginStatus = {
+		id: string;
+		status: string;
+		attempts: number;
+		exit_code: number | null;
+	};
+
 	let showPopup: boolean;
+	let statuses: { [id: string]: PluginStatus } = {};
+	let unlistenStatus: (() => void) | undefined;
+
+	async function listenStatus() {
+		if (unlistenStatus) return;
+		unlistenStatus = await listen<PluginStatus>("plugin_status", ({ payload }) => {
+			statuses = { ...statuses, [payload.id]: payload };
+		});
+	}
+
+	function stopStatus() {
+		unlistenStatus?.();
+		unlistenStatus = undefined;
+	}
+
+	$: if (showPopup) void listenStatus();
+	else stopStatus();
+
+	onDestroy(stopStatus);
+
 	setInterval(async () => {
-		if (showPopup) installed = await invoke("list_plugins");
+		if (showPopup) {
+			installed = await invoke("list_plugins");
+			const merged = { ...statuses };
+			for (const plugin of installed) {
+				if (!merged[plugin.id] && plugin.status) {
+					merged[plugin.id] = { id: plugin.id, status: plugin.status, attempts: 0, exit_code: null };
+				}
+			}
+			statuses = merged;
+		}
 	}, 1e3);
 
 	async function installPlugin(name: string, url: string | null, file: string | null, fallback_id: string | null) {
@@ -186,6 +224,16 @@
 	let installed: any[] = [];
 	(async () => (installed = await invoke("list_plugins")))();
 
+	async function restartPlugin(id: string) {
+		await invoke("restart_plugin", { id });
+		installed = await invoke("list_plugins");
+	}
+
+	async function setAutoRestart(id: string, enabled: boolean) {
+		await invoke("set_plugin_auto_restart", { id, enabled });
+		installed = await invoke("list_plugins");
+	}
+
 	let plugins: { [id: string]: GitHubPlugin };
 	(async () => (plugins = await (await fetch("https://openactionapi.github.io/plugins/catalogue.json")).json()))();
 
@@ -268,6 +316,8 @@
 				actionLabel={$settings?.developer ? $t("plugin_manager.reload") : $t("plugin_manager.remove")}}
 				secondaryAction={!plugin.registered ? () => invoke("open_log_directory") : plugin.has_settings_interface ? () => invoke("show_settings_interface", { plugin: plugin.id }) : undefined}
 				secondaryActionLabel={!plugin.registered ? $t("plugin_manager.view_logs") : $t("plugin_manager.plugin_settings")}}
+				status={statuses[plugin.id]?.status ?? plugin.status ?? "running"}
+				exitCode={statuses[plugin.id]?.exit_code ?? null}
 			>
 				<svelte:fragment slot="subtitle">
 					{plugin.version}
@@ -289,6 +339,21 @@
 					{:else if plugin.has_settings_interface}
 						<Gear size="24" class="text-green-600" />
 					{/if}
+				</svelte:fragment>
+
+				<svelte:fragment slot="controls">
+					<button
+						class="flex flex-row items-center justify-center p-1 text-neutral-300 hover:text-white"
+						on:click={() => void restartPlugin(plugin.id)}
+						aria-label={$t("plugin_manager.restart")}
+						title={$t("plugin_manager.restart")}
+					>
+						<ArrowClockwise size="18" />
+					</button>
+					<label class="flex flex-row items-center space-x-1 text-xs text-neutral-400" title={$t("plugin_manager.auto_restart")}>
+						<input type="checkbox" checked={plugin.auto_restart} on:change={(event) => void setAutoRestart(plugin.id, event.currentTarget.checked)} />
+						{$t("plugin_manager.auto_restart")}
+					</label>
 				</svelte:fragment>
 
 				{#if $settings?.developer}
