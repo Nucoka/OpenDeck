@@ -159,7 +159,7 @@
 {#key device}
 	<span id="grid-description" class="sr-only">{$t("device_view.grid_description")}</span>
 	<div
-		class="flex flex-col justify-center grow overflow-hidden px-8 py-6"
+		class="device-grid-shell flex flex-col justify-center grow overflow-hidden px-8 py-6"
 		class:items-center={device.columns <= 9}
 		class:hidden={$inspectedParentAction || selectedDevice != device.id}
 		role="grid"
@@ -171,7 +171,7 @@
 		on:keydown|capture={handleGridKeydown}
 		on:focusin={handleGridFocusin}
 	>
-		<div style:zoom={device.columns > 10 ? 0.6 : device.columns > 8 ? 0.75 : device.columns > 6 ? 0.9 : 1}>
+		<div class="device-grid-scale" style={`--grid-columns: ${device.columns}`}>
 			<div class="rounded-2xl border border-app-border bg-app-panel p-4" role="presentation">
 				<div class="flex flex-col" role="rowgroup">
 					{#each { length: device.rows } as _, r}
@@ -251,3 +251,13 @@
 		</div>
 	</div>
 {/key}
+
+<style>
+	.device-grid-shell {
+		container-type: inline-size;
+	}
+
+	.device-grid-scale {
+		zoom: min(1, calc(100cqw / (var(--grid-columns) * 132px + 32px)));
+	}
+</style>

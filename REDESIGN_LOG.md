@@ -17,4 +17,10 @@ Not verified: no GUI run, no visual check of the new slider and no hardware appl
 
 Symbol check: `git grep` matched only pre-existing language option labels in `SettingsView.svelte` (`中文`, `日本語`). They are intentional locale names, not redesign additions; left unchanged.
 
-## Step 2 - pending
+## Step 2 - adaptive device grid
+
+Done: replaced the column-count zoom thresholds with a CSS container query. The grid shell establishes `container-type: inline-size`; the inner scale uses `zoom: min(1, calc(100cqw / (var(--grid-columns) * 132px + 32px)))`. The CSS variable comes from `device.columns`, so any column count scales to the available width. `overflow-hidden` stays on the shell, so no horizontal scrollbar and no clipped right column.
+
+Not verified: no GUI run, so actual browser support for length division inside `calc()` in the Tauri webview was not observed. If the webview rejects it, the grid stays at zoom 1 and scrolls internally; fallback would be a resize observer (not added because it is logic, not markup/style).
+
+## Step 3 - pending
