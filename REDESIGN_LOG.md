@@ -72,3 +72,7 @@ Done: device chip has a 120px minimum and 220px maximum width, the device select
 ## Visual-fix 2 - key tile size
 
 Done: removed the 112/144 inner scale from `Key`, so a normal key now occupies the full 132px cell before CSS zoom. The grid shell still centres the panel and the container-query zoom shrinks the whole grid when space is tight; tiles grow back to 132px when the container allows. `size` still controls canvas resolution and the border margin; ParentActionView keeps its explicit 3/4 scale. Not verified in GUI; no horizontal scrollbar because the shell stays `overflow-hidden`.
+
+## Visual-fix 3 - Photo wall column persistence
+
+Done: `Columns with screens` is stored in `localStorage` under `opendeck.photoWall.screenColumns`, restored on mount with clamping to the current device, and written back on change. No Rust or settings-store changes. Not verified across an actual app restart; storage errors are swallowed on purpose.

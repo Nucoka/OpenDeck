@@ -12,9 +12,10 @@
 	import Popup from "./Popup.svelte";
 
 	import { invoke } from "@tauri-apps/api/core";
-	import { onDestroy } from "svelte";
+	import { onDestroy, onMount } from "svelte";
 
 	const TILE_DELAY_MS = 120;
+	const SCREEN_COLUMNS_KEY = "opendeck.photoWall.screenColumns";
 	const isDev = (import.meta as ImportMeta & { env: { DEV: boolean } }).env.DEV;
 
 	type TileSnapshot = {
@@ -47,6 +48,7 @@
 	let background = "#000000";
 	let hideText = true;
 	let screenColumns = device.columns;
+	let settingsLoaded = false;
 	let error = "";
 	let limit: number | undefined;
 	let applying = false;
@@ -64,6 +66,24 @@
 	$: columnsWithScreens = Math.max(1, Math.min(screenColumns, device.columns));
 	$: params = { image, mode, gap, background, columns: columnsWithScreens, rows: device.rows, tileWidth, tileHeight };
 	$: if (params.image && previewCanvas) scheduleRender(params);
+
+	onMount(() => {
+		try {
+			const stored = Number(localStorage.getItem(SCREEN_COLUMNS_KEY));
+			if (Number.isInteger(stored) && stored >= 1 && stored <= device.columns) screenColumns = stored;
+		} catch {
+			// Ignore unavailable local storage.
+		}
+		settingsLoaded = true;
+	});
+
+	$: if (settingsLoaded) {
+		try {
+			localStorage.setItem(SCREEN_COLUMNS_KEY, String(screenColumns));
+		} catch {
+			// Ignore unavailable local storage.
+		}
+	}
 
 	onDestroy(() => {
 		if (debounceTimer !== undefined) clearTimeout(debounceTimer);
