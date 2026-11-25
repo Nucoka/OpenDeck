@@ -47,3 +47,9 @@ Not verified: no GUI run, so control alignment and localStorage persistence were
 Done: device summary card with real name, id, key count, unique plugin count and profile count; profile cards with a cheap coloured mini-grid, active state, and click-to-switch through the existing `ProfileManager.setProfile` flow; a New profile card using the same switching/creation path; and a Manage profiles block reusing the existing ProfileManager popup for rename, delete and application profiles. Mini-previews use action presence only, not images. No firmware, serial number or fake metrics were added. No Tauri command signatures or handlers were changed; the page calls the same existing commands through the existing component API.
 
 Not verified: no GUI run, so switching behaviour and card layout were not observed.
+
+## Step 7 - accessibility and polish
+
+Done: 2px accent focus ring extended to links, summaries, list options and focusable containers; a keyboard skip link was added; sidebar items expose `aria-current`; empty states were unified for the action library, installed plugins and profile grid; hover/pressed/disabled states were added for cards, chips, swatches and buttons. Contrast was checked in source only: muted text `#8B8B94` on `#0B0B0E` and white text on the primary button exceed AA ratios.
+
+Not verified: no GUI run, so actual focus order, screen-reader output and rendered contrast were not observed.

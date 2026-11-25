@@ -330,6 +330,9 @@
 
 	{#if pluginTab === "installed"}
 		<div class="flex flex-col">
+			{#if filteredInstalled.length === 0}
+				<div class="empty-state">{$t("v2.plugins.empty")}</div>
+			{/if}
 			{#each filteredInstalled as plugin}
 				<ListedPlugin
 					icon={getWebserverUrl(plugin.icon)}

@@ -70,6 +70,9 @@
 	</section>
 
 	<div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+		{#if profiles.length === 0}
+			<div class="empty-state">{$t("v2.profile.empty")}</div>
+		{/if}
 		{#each profiles as id}
 			<button class="profile-card" class:profile-card-active={profile?.id === id} on:click={() => void switchProfile(id)}>
 				<div class="profile-preview" style={`--cols: ${device.columns}; --rows: ${device.rows}`}>

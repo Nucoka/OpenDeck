@@ -60,6 +60,13 @@
 
 <svelte:window on:dragover={(event) => event.preventDefault()} on:drop={(event) => event.preventDefault()} />
 
+<a
+	href="#main-content"
+	class="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded-xl focus:bg-white focus:px-3 focus:py-2 focus:text-[#0B0B0E]"
+>
+	{$t("v2.skip")}
+</a>
+
 <div class="flex h-screen flex-row bg-app-bg text-app-text">
 	<aside
 		class="app-sidebar glass flex shrink-0 flex-col border-r border-app-border bg-app-panel"
@@ -72,23 +79,48 @@
 		</div>
 
 		<nav class="flex flex-col gap-1 p-2" aria-label={$t("nav.devices")}>
-			<button class="side-row" class:side-row-active={currentPage === "devices"} on:click={() => (currentPage = "devices")}>
+			<button
+				class="side-row"
+				class:side-row-active={currentPage === "devices"}
+				aria-current={currentPage === "devices" ? "page" : undefined}
+				on:click={() => (currentPage = "devices")}
+			>
 				<SquaresFour size={20} />
 				<span>{$t("nav.devices")}</span>
 			</button>
-			<button class="side-row" class:side-row-active={currentPage === "plugins"} on:click={() => (currentPage = "plugins")}>
+			<button
+				class="side-row"
+				class:side-row-active={currentPage === "plugins"}
+				aria-current={currentPage === "plugins" ? "page" : undefined}
+				on:click={() => (currentPage = "plugins")}
+			>
 				<Plug size={20} />
 				<span>{$t("plugin_manager.button")}</span>
 			</button>
-			<button class="side-row" class:side-row-active={currentPage === "photo-wall"} on:click={() => (currentPage = "photo-wall")}>
+			<button
+				class="side-row"
+				class:side-row-active={currentPage === "photo-wall"}
+				aria-current={currentPage === "photo-wall" ? "page" : undefined}
+				on:click={() => (currentPage = "photo-wall")}
+			>
 				<ImageSquare size={20} />
 				<span>{$t("photo_wall.button")}</span>
 			</button>
-			<button class="side-row" class:side-row-active={currentPage === "settings"} on:click={() => (currentPage = "settings")}>
+			<button
+				class="side-row"
+				class:side-row-active={currentPage === "settings"}
+				aria-current={currentPage === "settings" ? "page" : undefined}
+				on:click={() => (currentPage = "settings")}
+			>
 				<Gear size={20} />
 				<span>{$t("settings.button")}</span>
 			</button>
-			<button class="side-row" class:side-row-active={currentPage === "profile"} on:click={() => (currentPage = "profile")}>
+			<button
+				class="side-row"
+				class:side-row-active={currentPage === "profile"}
+				aria-current={currentPage === "profile" ? "page" : undefined}
+				on:click={() => (currentPage = "profile")}
+			>
 				<UserCircle size={20} />
 				<span>{$t("profile_manager.label")}</span>
 			</button>
@@ -120,7 +152,7 @@
 			</div>
 		</header>
 
-		<main class="page-area relative min-h-0 grow overflow-auto p-5">
+		<main id="main-content" class="page-area relative min-h-0 grow overflow-auto p-5">
 			{#if currentPage === "devices"}
 				<div class="flex h-full min-h-0 gap-4">
 					<aside

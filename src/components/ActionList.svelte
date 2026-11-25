@@ -103,6 +103,9 @@
 
 	<span id="action-list-hint" class="sr-only">{$t("action_list.hint")}</span>
 	<div class="mt-3 grow overflow-auto select-none">
+		{#if filteredCategories.length === 0}
+			<div class="empty-state">{$t("v2.actions.empty")}</div>
+		{/if}
 		{#each filteredCategories as [categoryName, { actions }]}
 			<div class="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-app-muted">{categoryName}</div>
 			<div
