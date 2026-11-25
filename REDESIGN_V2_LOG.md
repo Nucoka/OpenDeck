@@ -35,3 +35,9 @@ Not verified: no GUI run, so row wrapping and tab switching were not observed.
 Done: two-column page with dropzone, preview card, selected-image thumbnail and eight gradient presets. Right panel holds Mode, Columns with screens (mono value), Gap, background for Fit, Hide labels, and an always-visible "Apply to first N keys" field where empty means All. Footer has Reset (secondary) and Apply to deck (primary). Gradient presets feed a canvas-generated image into the existing `slicePhoto` path; Apply/Reset logic and invoke calls are unchanged.
 
 Not verified: no GUI run, and Apply/Reset were intentionally not clicked.
+
+## Step 5 - Settings page
+
+Done: two-column card layout with rows (name + description left, control right). Left column: General and Behavior; right column: Appearance, Data and Advanced. All existing app settings remain, including the numeric Sleep value and the platform-conditional separate Wine prefixes, which was kept in Advanced. Accent, Glass blur and Background motion are stored in `localStorage` via `appearance.ts`; no Light theme was added. Data actions keep their existing backup, restore and folder-opening calls.
+
+Not verified: no GUI run, so control alignment and localStorage persistence were not observed.

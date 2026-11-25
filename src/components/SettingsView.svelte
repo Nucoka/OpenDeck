@@ -6,6 +6,7 @@
 	import Popup from "./Popup.svelte";
 	import Tooltip from "./Tooltip.svelte";
 
+	import { ACCENTS, loadAppearance, saveAppearance, type Accent } from "$lib/appearance";
 	import { t } from "$lib/i18n";
 	import { settings } from "$lib/settings";
 	import { PRODUCT_NAME } from "$lib/singletons";
@@ -17,7 +18,23 @@
 	let showPopup: boolean;
 	export let inline: boolean = false;
 	let buildInfo: string;
+	let appearance = loadAppearance();
 	(async () => (buildInfo = await invoke("get_build_info")))();
+
+	function setAccent(accent: Accent) {
+		appearance = { ...appearance, accent };
+		saveAppearance(appearance);
+	}
+
+	function setBlur(value: number) {
+		appearance = { ...appearance, blur: value };
+		saveAppearance(appearance);
+	}
+
+	function setMotion(value: boolean) {
+		appearance = { ...appearance, motion: value };
+		saveAppearance(appearance);
+	}
 
 	listen("device_brightness", ({ payload }: { payload: { action: string; value: number } }) => {
 		if (!$settings) return;
@@ -63,160 +80,237 @@
 
 <Popup show={inline || showPopup} {inline} label={$t("settings.button")}>
 	<svelte:fragment slot="header">
-		<button class="mr-2 my-1 float-right text-xl text-app-text" on:click={() => (showPopup = false)} aria-label={$t("settings.close")}>✕</button>
-		<h2 class="m-2 font-semibold text-xl text-app-text">{$t("settings.button")}</h2>
+		{#if !inline}
+			<button class="mr-2 my-1 float-right text-xl text-app-text" on:click={() => (showPopup = false)} aria-label={$t("settings.close")}>✕</button>
+		{/if}
 	</svelte:fragment>
 
 	{#if $settings}
-		<section class="mx-2 mb-6">
-			<h3 class="mb-3 font-semibold text-app-accent">{$t("settings.section.display")}</h3>
-			<div class="flex flex-row items-center mx-2 mb-2 space-x-2">
-				<label for="settings-language" class="text-app-muted">{$t("settings.language")}</label>
-				<div class="select-wrapper">
-					<select bind:value={$settings.language} class="w-auto pr-10!" id="settings-language">
-						<option value="de">Deutsch</option>
-						<option value="en">English</option>
-						<option value="es">Español</option>
-						<option value="fr">Français</option>
-						<option value="pt_BR">Português (Brasil)</option>
-						<option value="sv">Svenska</option>
-						<option value="uk">Українська</option>
-						<option value="zh_CN">中文</option>
-						<option value="ja">日本語</option>
-						<option value="ko">한국어</option>
-					</select>
-				</div>
-				<Tooltip>
-					{$t("settings.language.tooltip", { PRODUCT_NAME })}
-				</Tooltip>
+		<div class="m-3 grid grid-cols-1 gap-4 lg:grid-cols-2">
+			<div class="flex flex-col gap-4">
+				<section class="settings-card">
+					<h3 class="v2-section-title mt-0">{$t("v2.settings.general")}</h3>
+
+					<div class="settings-row">
+						<div class="min-w-0">
+							<div>{$t("settings.language")}</div>
+							<div class="settings-desc">{$t("v2.settings.language.desc")}</div>
+						</div>
+						<div class="flex shrink-0 items-center gap-2">
+							<div class="select-wrapper">
+								<select bind:value={$settings.language} class="w-auto pr-10!" id="settings-language">
+									<option value="de">Deutsch</option>
+									<option value="en">English</option>
+									<option value="es">Español</option>
+									<option value="fr">Français</option>
+									<option value="pt_BR">Português (Brasil)</option>
+									<option value="sv">Svenska</option>
+									<option value="uk">Українська</option>
+									<option value="zh_CN">中文</option>
+									<option value="ja">日本語</option>
+									<option value="ko">한국어</option>
+								</select>
+							</div>
+							<Tooltip>{$t("settings.language.tooltip", { PRODUCT_NAME })}</Tooltip>
+						</div>
+					</div>
+
+					<div class="settings-row">
+						<div class="min-w-0">
+							<div>{$t("settings.sleep_timeout_minutes")}</div>
+							<div class="settings-desc">{$t("v2.settings.sleep.desc")}</div>
+						</div>
+						<div class="flex shrink-0 items-center gap-2">
+							<input
+								type="number"
+								min="0"
+								bind:value={$settings.sleep_timeout_minutes}
+								class="w-16 rounded-xl border border-app-border bg-app-elevated px-2 py-1 text-xs font-mono text-app-text"
+								id="settings-sleep_timeout_minutes"
+							/>
+							<span class="text-xs text-app-muted">{$t("settings.sleep_timeout_minutes.minutes")}</span>
+							<Tooltip>{$t("settings.sleep_timeout_minutes.tooltip")}</Tooltip>
+						</div>
+					</div>
+
+					<div class="settings-row">
+						<div class="min-w-0">
+							<div>{$t("settings.brightness")}</div>
+							<div class="settings-desc">{$t("v2.settings.brightness.desc")}</div>
+						</div>
+						<input type="range" min="0" max="100" bind:value={$settings.brightness} id="settings-brightness" class="w-40" />
+					</div>
+
+					<div class="settings-row">
+						<div class="min-w-0">
+							<div>{$t("settings.autolaunch")}</div>
+							<div class="settings-desc">{$t("v2.settings.autolaunch.desc")}</div>
+						</div>
+						<div class="flex shrink-0 items-center gap-2">
+							<input type="checkbox" bind:checked={$settings.autolaunch} id="settings-autolaunch" />
+							<Tooltip>
+								{$t("settings.autolaunch.tooltip.1", { PRODUCT_NAME })}
+								{#if buildInfo?.split("</summary>")[0]?.includes("linux")}
+									<br />
+									{$t("settings.autolaunch.tooltip.2", { PRODUCT_NAME })}
+								{/if}
+							</Tooltip>
+						</div>
+					</div>
+
+					<div class="settings-row">
+						<div class="min-w-0">
+							<div>{$t("settings.updatecheck")}</div>
+							<div class="settings-desc">{$t("v2.settings.updatecheck.desc")}</div>
+						</div>
+						<input type="checkbox" bind:checked={$settings.updatecheck} id="settings-updatecheck" />
+					</div>
+				</section>
+
+				<section class="settings-card">
+					<h3 class="v2-section-title mt-0">{$t("settings.section.behavior")}</h3>
+					<div class="settings-row">
+						<div class="min-w-0">
+							<div>{$t("settings.sleep_when_computer_locked")}</div>
+							<div class="settings-desc">{$t("v2.settings.sleepLocked.desc")}</div>
+						</div>
+						<div class="flex shrink-0 items-center gap-2">
+							<input type="checkbox" bind:checked={$settings.sleep_when_computer_locked} id="settings-sleep_when_computer_locked" />
+							<Tooltip>{$t("settings.sleep_when_computer_locked.tooltip")}</Tooltip>
+						</div>
+					</div>
+
+					<div class="settings-row">
+						<div class="min-w-0">
+							<div>{$t("settings.background")}</div>
+							<div class="settings-desc">{$t("v2.settings.background.desc")}</div>
+						</div>
+						<div class="flex shrink-0 items-center gap-2">
+							<input type="checkbox" bind:checked={$settings.background} id="settings-background" />
+							<Tooltip>{$t("settings.background.tooltip", { PRODUCT_NAME })}</Tooltip>
+						</div>
+					</div>
+
+					<div class="settings-row">
+						<div class="min-w-0">
+							<div>{$t("settings.rotation")}</div>
+							<div class="settings-desc">{$t("v2.settings.rotation.desc")}</div>
+						</div>
+						<input type="range" min="0" max="270" step="90" bind:value={$settings.rotation} id="settings-rotation" class="w-40" />
+					</div>
+				</section>
 			</div>
 
-			<div class="flex flex-row items-center m-2 space-x-2">
-				<label for="settings-brightness" class="text-app-muted">{$t("settings.brightness")}</label>
-				<input type="range" min="0" max="100" bind:value={$settings.brightness} id="settings-brightness" />
-			</div>
+			<div class="flex flex-col gap-4">
+				<section class="settings-card">
+					<h3 class="v2-section-title mt-0">{$t("v2.settings.appearance")}</h3>
+					<div class="settings-row">
+						<div class="min-w-0">
+							<div>{$t("v2.settings.accent.desc")}</div>
+						</div>
+						<div class="flex shrink-0 flex-row gap-2">
+							{#each ACCENTS as accent}
+								<button
+									class="accent-swatch"
+									class:accent-swatch-active={appearance.accent === accent}
+									style:background={accent}
+									on:click={() => setAccent(accent)}
+									aria-label={accent}
+									title={accent}
+								></button>
+							{/each}
+						</div>
+					</div>
 
-			<div class="flex flex-row items-center m-2 space-x-2">
-				<label for="settings-rotation" class="text-app-muted">{$t("settings.rotation")}</label>
-				<input type="range" min="0" max="270" step="90" bind:value={$settings.rotation} id="settings-rotation" />
-			</div>
-		</section>
+					<div class="settings-row">
+						<div class="min-w-0">
+							<div>{$t("v2.settings.general")}</div>
+							<div class="settings-desc">{$t("v2.settings.blur.desc")}</div>
+						</div>
+						<div class="flex shrink-0 items-center gap-2">
+							<input
+								type="range"
+								min="0"
+								max="24"
+								value={appearance.blur}
+								on:change={(event) => setBlur(Number(event.currentTarget.value))}
+								class="w-40"
+								aria-label={$t("v2.settings.blur.desc")}
+							/>
+							<span class="w-8 text-xs font-mono text-app-text">{appearance.blur}</span>
+						</div>
+					</div>
 
-		<section class="mx-2 mb-6">
-			<h3 class="mb-3 font-semibold text-app-accent">{$t("settings.section.behavior")}</h3>
-			<div class="flex flex-row items-center m-2 space-x-2">
-				<label for="settings-sleep_timeout_minutes" class="text-app-muted">{$t("settings.sleep_timeout_minutes")}</label>
-				<input
-					type="number"
-					min="0"
-					bind:value={$settings.sleep_timeout_minutes}
-					class="w-12 px-1 text-app-text border border-app-border rounded-lg"
-					id="settings-sleep_timeout_minutes"
-				/>
-				<span class="text-app-muted">{$t("settings.sleep_timeout_minutes.minutes")}</span>
-				<Tooltip>{$t("settings.sleep_timeout_minutes.tooltip")}</Tooltip>
-			</div>
+					<div class="settings-row">
+						<div class="min-w-0">
+							<div>{$t("v2.settings.motion.desc")}</div>
+						</div>
+						<input
+							type="checkbox"
+							checked={appearance.motion}
+							on:change={(event) => setMotion(event.currentTarget.checked)}
+							aria-label={$t("v2.settings.motion.desc")}
+						/>
+					</div>
+				</section>
 
-			<div class="flex flex-row items-center m-2 space-x-2">
-				<label for="settings-sleep_when_computer_locked" class="text-app-muted">{$t("settings.sleep_when_computer_locked")}</label>
-				<input type="checkbox" bind:checked={$settings.sleep_when_computer_locked} id="settings-sleep_when_computer_locked" />
-				<Tooltip>{$t("settings.sleep_when_computer_locked.tooltip")}</Tooltip>
-			</div>
+				<section class="settings-card">
+					<h3 class="v2-section-title mt-0">{$t("settings.section.config")}</h3>
+					<div class="settings-desc mb-2">{$t("v2.settings.data.desc")}</div>
+					<div class="flex flex-row flex-wrap gap-2">
+						<button class="secondary-button" on:click={() => backupConfig()}><ClockCounterClockwise size={16} />{$t("settings.backup_config.button")}</button>
+						<button class="secondary-button" on:click={() => restoreConfig()}><ClockClockwise size={16} />{$t("settings.restore_config.button")}</button>
+						<button class="secondary-button" on:click={() => invoke("open_config_directory")}><Gear size={16} />{$t("settings.open_config")}</button>
+						<button class="secondary-button" on:click={() => invoke("open_log_directory")}><Scroll size={16} />{$t("settings.open_logs")}</button>
+					</div>
+					<span class="mt-3 block text-xs text-app-muted">{@html buildInfo}</span>
+				</section>
 
-			<div class="flex flex-row items-center m-2 space-x-2">
-				<label for="settings-background" class="text-app-muted">{$t("settings.background")}</label>
-				<input type="checkbox" bind:checked={$settings.background} id="settings-background" />
-				<Tooltip>{$t("settings.background.tooltip", { PRODUCT_NAME })}</Tooltip>
-			</div>
-		</section>
+				<section class="settings-card">
+					<h3 class="v2-section-title mt-0">{$t("settings.section.advanced")}</h3>
+					<div class="settings-row">
+						<div class="min-w-0">
+							<div>{$t("settings.statistics")}</div>
+							<div class="settings-desc">{$t("v2.settings.statistics.desc")}</div>
+						</div>
+						<input type="checkbox" bind:checked={$settings.statistics} id="settings-statistics" />
+					</div>
 
-		<section class="mx-2 mb-6">
-			<h3 class="mb-3 font-semibold text-app-accent">{$t("settings.section.system")}</h3>
-			<div class="flex flex-row items-center m-2 space-x-2">
-				<label for="settings-autolaunch" class="text-app-muted">{$t("settings.autolaunch")}</label>
-				<input type="checkbox" bind:checked={$settings.autolaunch} id="settings-autolaunch" />
-				<Tooltip>
-					{$t("settings.autolaunch.tooltip.1", { PRODUCT_NAME })}
-					{#if buildInfo?.split("</summary>")[0]?.includes("linux")}
-						<br />
-						{$t("settings.autolaunch.tooltip.2", { PRODUCT_NAME })}
+					{#if !buildInfo?.split("</summary>")[0]?.includes("windows")}
+						<div class="settings-row">
+							<div class="min-w-0">
+								<div>{$t("settings.separatewine")}</div>
+							</div>
+							<div class="flex shrink-0 items-center gap-2">
+								<input type="checkbox" bind:checked={$settings.separatewine} id="settings-separatewine" />
+								<Tooltip>{$t("settings.separatewine.tooltip", { PRODUCT_NAME })}</Tooltip>
+							</div>
+						</div>
 					{/if}
-				</Tooltip>
+
+					<div class="settings-row">
+						<div class="min-w-0">
+							<div>{$t("settings.developer")}</div>
+							<div class="settings-desc">{$t("v2.settings.developer.desc")}</div>
+						</div>
+						<div class="flex shrink-0 items-center gap-2">
+							<input type="checkbox" bind:checked={$settings.developer} id="settings-developer" />
+							<Tooltip>{$t("settings.developer.tooltip")}</Tooltip>
+						</div>
+					</div>
+
+					<div class="settings-row">
+						<div class="min-w-0">
+							<div>{$t("settings.disableelgato")}</div>
+							<div class="settings-desc">{$t("v2.settings.disableElgato.desc")}</div>
+						</div>
+						<div class="flex shrink-0 items-center gap-2">
+							<input type="checkbox" bind:checked={$settings.disableelgato} id="settings-disableelgato" />
+							<Tooltip>{$t("settings.disableelgato.tooltip")}</Tooltip>
+						</div>
+					</div>
+				</section>
 			</div>
-
-			<div class="flex flex-row items-center m-2 space-x-2">
-				<label for="settings-updatecheck" class="text-app-muted">{$t("settings.updatecheck")}</label>
-				<input type="checkbox" bind:checked={$settings.updatecheck} id="settings-updatecheck" />
-			</div>
-
-			<div class="flex flex-row items-center m-2 space-x-2">
-				<label for="settings-statistics" class="text-app-muted">{$t("settings.statistics")}</label>
-				<input type="checkbox" bind:checked={$settings.statistics} id="settings-statistics" />
-			</div>
-
-			{#if !buildInfo?.split("</summary>")[0]?.includes("windows")}
-				<div class="flex flex-row items-center m-2 space-x-2">
-					<label for="settings-separatewine" class="text-app-muted">{$t("settings.separatewine")}</label>
-					<input type="checkbox" bind:checked={$settings.separatewine} id="settings-separatewine" />
-					<Tooltip>
-						{$t("settings.separatewine.tooltip", { PRODUCT_NAME })}
-					</Tooltip>
-				</div>
-			{/if}
-
-			<div class="flex flex-row items-center m-2 space-x-2">
-				<label for="settings-developer" class="text-app-muted">{$t("settings.developer")}</label>
-				<input type="checkbox" bind:checked={$settings.developer} id="settings-developer" />
-				<Tooltip>
-					{$t("settings.developer.tooltip")}
-				</Tooltip>
-			</div>
-
-			<div class="flex flex-row items-center m-2 space-x-2">
-				<label for="settings-disableelgato" class="text-app-muted">{$t("settings.disableelgato")}</label>
-				<input type="checkbox" bind:checked={$settings.disableelgato} id="settings-disableelgato" />
-				<Tooltip>{$t("settings.disableelgato.tooltip")}</Tooltip>
-			</div>
-		</section>
-	{/if}
-
-	<section class="mx-2 mb-6">
-		<h3 class="mb-3 font-semibold text-app-accent">{$t("settings.section.config")}</h3>
-		<div class="ml-2">
-			<div class="flex flex-row my-3 space-x-2">
-				<button
-					class="flex flex-row items-center px-2 py-1 text-sm text-app-text bg-app-elevated hover:bg-app-border transition-colors border border-app-border rounded-lg"
-					on:click={() => backupConfig()}
-				>
-					<ClockCounterClockwise class="mr-1" />
-					{$t("settings.backup_config.button")}
-				</button>
-				<button
-					class="flex flex-row items-center px-2 py-1 text-sm text-app-text bg-app-elevated hover:bg-app-border transition-colors border border-app-border rounded-lg"
-					on:click={() => restoreConfig()}
-				>
-					<ClockClockwise class="mr-1" />
-					{$t("settings.restore_config.button")}
-				</button>
-				<button
-					class="flex flex-row items-center px-2 py-1 text-sm text-app-text bg-app-elevated hover:bg-app-border transition-colors border border-app-border rounded-lg"
-					on:click={() => invoke("open_config_directory")}
-				>
-					<Gear class="mr-1" />
-					{$t("settings.open_config")}
-				</button>
-				<button
-					class="flex flex-row items-center px-2 py-1 text-sm text-app-text bg-app-elevated hover:bg-app-border transition-colors border border-app-border rounded-lg"
-					on:click={() => invoke("open_log_directory")}
-				>
-					<Scroll class="mr-1" />
-					{$t("settings.open_logs")}
-				</button>
-			</div>
-
-			<span class="text-xs text-app-muted">
-				{@html buildInfo}
-			</span>
 		</div>
-	</section>
+	{/if}
 </Popup>

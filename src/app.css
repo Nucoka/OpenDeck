@@ -332,6 +332,26 @@ input[type="radio"] {
 	@apply mb-2 mt-3 text-xs font-semibold uppercase tracking-wide text-app-muted;
 }
 
+.settings-card {
+	@apply rounded-[20px] border border-app-border bg-app-card p-4;
+}
+
+.settings-row {
+	@apply flex flex-row items-center justify-between gap-4 border-b border-app-border py-3 last:border-b-0;
+}
+
+.settings-desc {
+	@apply mt-1 text-xs text-app-muted;
+}
+
+.accent-swatch {
+	@apply size-8 rounded-[10px] border-2 border-transparent;
+}
+
+.accent-swatch-active {
+	@apply border-white;
+}
+
 .tab-button {
 	@apply rounded-xl px-3 py-1 text-xs text-app-muted transition-colors hover:text-app-text;
 }
