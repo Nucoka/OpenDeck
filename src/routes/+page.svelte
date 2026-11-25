@@ -82,8 +82,8 @@
 	</aside>
 
 	<div class="flex min-w-0 grow flex-col">
-		<header class="grid h-14 shrink-0 grid-cols-3 items-center border-b border-app-border bg-app-bg px-6" class:hidden={$inspectedParentAction}>
-			<div class="flex items-center gap-2">
+		<header class="grid h-14 shrink-0 grid-cols-3 items-center gap-2 border-b border-app-border bg-app-bg px-6" class:hidden={$inspectedParentAction}>
+			<div class="flex min-w-0 items-center gap-2 overflow-hidden">
 				{#key selectedDevice}
 					{#if selectedDevice && devices[selectedDevice]}
 						<ProfileManager bind:device={devices[selectedDevice]} bind:profile={selectedProfiles[selectedDevice]} bind:this={$profileManager} />
@@ -91,9 +91,9 @@
 				{/key}
 			</div>
 
-			<div class="flex items-center justify-center gap-2">
+			<div class="device-chip flex min-w-[120px] max-w-[220px] items-center justify-center gap-2">
 				<span
-					class="size-2 rounded-full"
+					class="size-2 shrink-0 rounded-full"
 					class:bg-app-success={Boolean(selectedDevice && devices[selectedDevice])}
 					class:bg-app-danger={!selectedDevice || !devices[selectedDevice]}
 					aria-hidden="true"
@@ -101,11 +101,11 @@
 				<DeviceSelector bind:devices bind:value={selectedDevice} bind:selectedProfiles bind:this={$deviceSelector} />
 			</div>
 
-			<div class="flex items-center justify-end gap-4">
+			<div class="flex min-w-0 items-center justify-end gap-2 overflow-hidden">
 				{#if $settings}
-					<label class="flex items-center gap-2 text-xs text-app-muted" for="header-brightness">
+					<label class="flex min-w-0 items-center gap-2 text-xs text-app-muted" for="header-brightness">
 						{$t("settings.brightness")}
-						<input id="header-brightness" type="range" min="0" max="100" bind:value={$settings.brightness} class="w-28 accent-app-accent" />
+						<input id="header-brightness" type="range" min="0" max="100" bind:value={$settings.brightness} class="w-20 shrink-0 accent-app-accent xl:w-28" />
 					</label>
 				{/if}
 				{#if selectedDevice && devices[selectedDevice] && selectedProfiles[selectedDevice]}

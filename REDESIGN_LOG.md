@@ -64,3 +64,7 @@ Not verified: no GUI run, no profiling, no measurement of repaint counts.
 Done: created `REDESIGN_REPORT.md` with step summary, no rollbacks, mockup differences, the full list of things not visually verified, and a five-item manual check list. Pushed branch `redesign` to origin without force.
 
 Not verified: report content was not rendered as Markdown in the app; no GUI run at any step.
+
+## Visual-fix 1 - titlebar overflow
+
+Done: device chip has a 120px minimum and 220px maximum width, the device select uses `truncate` with ellipsis, and all three header columns are `min-w-0` with reduced gaps and a narrower brightness slider for 960px windows. Not verified in GUI.
