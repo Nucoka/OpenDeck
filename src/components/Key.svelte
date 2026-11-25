@@ -192,14 +192,17 @@
 		label + (slot ? ": " + slot.action.name + (state?.show && (state?.text_override || state?.text) ? " - " + (state.text_override || state.text) : "") : "");
 </script>
 
-<div class="relative" style={`transform: scale(${scale});`}>
+<div
+	class="key-tile relative"
+	class:key-selected={active && ((slot && $inspectedInstance == slot.context) || (context && $inspectedInstance == context))}
+	class:rounded-full!={context?.controller == "Encoder"}
+	class:rounded-lg!={context?.controller == "Infobar"}
+	style:aspect-ratio={width === height ? "1 / 1" : `${width} / ${height}`}
+	style:width={`${scale * 100}%`}
+>
 	<canvas
 		bind:this={canvas}
-		class="relative border-2 border-app-border rounded-xl outline-none outline-offset-2 outline-app-accent"
-		style={`margin: ${-((size + 3 * 2 /* border */ - 132) /* desired outer size */ / 2)}px;`}
-		class:outline-solid={active && ((slot && $inspectedInstance == slot.context) || (context && $inspectedInstance == context))}
-		class:rounded-full!={context?.controller == "Encoder"}
-		class:rounded-lg!={context?.controller == "Infobar"}
+		class="block h-full w-full"
 		class:bg-app-bg={slot != null}
 		{width}
 		{height}
@@ -264,3 +267,21 @@
 {#if slot && showEditor}
 	<InstanceEditor bind:instance={slot} bind:showEditor />
 {/if}
+
+<style>
+	.key-tile {
+		width: 100%;
+		overflow: hidden;
+		border: 2px solid var(--color-app-border);
+		border-radius: 12px;
+		background: var(--color-app-bg);
+	}
+
+	.key-tile canvas {
+		border-radius: inherit;
+	}
+
+	.key-tile.key-selected {
+		box-shadow: 0 0 0 2px var(--color-app-accent);
+	}
+</style>

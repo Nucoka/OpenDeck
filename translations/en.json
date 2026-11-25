@@ -1,6 +1,7 @@
 {
 	"action_list.hint": "Use arrow keys to navigate between actions within a category.",
 	"action_list.search_placeholder": "Search actions",
+	"action_list.toggle": "Toggle action library",
 	"device_selector.choose_device": "Choose a device...",
 	"device_selector.device": "Device",
 	"device_view.encoder": "Encoder",

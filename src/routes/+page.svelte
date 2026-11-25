@@ -12,6 +12,7 @@
 	import Diamond from "phosphor-svelte/lib/Diamond";
 	import Gear from "phosphor-svelte/lib/Gear";
 	import ImageSquare from "phosphor-svelte/lib/ImageSquare";
+	import List from "phosphor-svelte/lib/List";
 	import Plug from "phosphor-svelte/lib/Plug";
 	import SquaresFour from "phosphor-svelte/lib/SquaresFour";
 	import UserCircle from "phosphor-svelte/lib/UserCircle";
@@ -33,6 +34,7 @@
 	let selectedProfiles: { [id: string]: Profile } = {};
 	let showPhotoWall = false;
 	let inspectorTab: "appearance" | "action" = "appearance";
+	let actionsCollapsed = typeof window !== "undefined" && window.innerWidth < 1400;
 
 	$: selectedInstance = ((): ActionInstance | null => {
 		const context = typeof $inspectedInstance === "string" ? $inspectedInstance : null;
@@ -55,10 +57,10 @@
 <svelte:window on:dragover={(event) => event.preventDefault()} on:drop={(event) => event.preventDefault()} />
 
 <div class="flex h-screen flex-row bg-app-bg text-app-text">
-	<aside class="flex w-44 shrink-0 flex-col border-r border-app-border bg-app-panel" class:hidden={$inspectedParentAction}>
+	<aside class="app-sidebar flex shrink-0 flex-col border-r border-app-border bg-app-panel" class:hidden={$inspectedParentAction}>
 		<div class="flex h-14 items-center gap-2 border-b border-app-border px-4">
-			<Diamond size={18} weight="fill" class="text-app-accent" />
-			<span class="text-sm font-semibold tracking-wide">OpenDeck</span>
+			<Diamond size={18} weight="fill" class="shrink-0 text-app-accent" />
+			<span class="brand-label text-sm font-semibold tracking-wide">OpenDeck</span>
 		</div>
 
 		<nav class="flex flex-col gap-1 p-2" aria-label={$t("settings.button")}>
@@ -118,9 +120,19 @@
 			</div>
 		</header>
 
-		<main class="flex min-h-0 grow">
-			<aside class="w-56 shrink-0 overflow-hidden border-r border-app-border bg-app-panel">
-				<ActionList bind:this={$actionList} />
+		<main class="relative flex min-h-0 grow">
+			<aside class="action-rail flex shrink-0 flex-col overflow-hidden border-r border-app-border bg-app-panel" class:collapsed={actionsCollapsed}>
+				<button
+					class="flex h-10 shrink-0 items-center justify-center border-b border-app-border text-app-muted hover:text-app-accent"
+					on:click={() => (actionsCollapsed = !actionsCollapsed)}
+					aria-label={$t("action_list.toggle")}
+					title={$t("action_list.toggle")}
+				>
+					<List size={18} />
+				</button>
+				<div class="min-w-0 flex-1" class:hidden={actionsCollapsed}>
+					<ActionList bind:this={$actionList} />
+				</div>
 			</aside>
 
 			<div class="flex min-w-0 grow flex-col">
@@ -139,7 +151,7 @@
 				{/if}
 			</div>
 
-			<aside class="flex w-[360px] shrink-0 flex-col border-l border-app-border bg-app-panel">
+			<aside class="inspector-panel flex shrink-0 flex-col border-l border-app-border bg-app-panel">
 				<div class="flex h-10 shrink-0 items-center gap-1 border-b border-app-border px-3">
 					<button
 						class="rounded-lg px-3 py-1 text-xs text-app-muted hover:text-app-text"

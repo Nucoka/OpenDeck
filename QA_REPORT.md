@@ -51,3 +51,17 @@ The mockups are 2560x1600 (2x) versions of a 1280x800 window. Programmatic colou
 - Visual inspection by eye: images are not rendered in this session. Only geometry, UI Automation and pixel colours were checked.
 - Photo wall persistence across an actual application restart: the value was read (6) but not changed, because changing settings was forbidden. WebView2 storage lives under `%LOCALAPPDATA%\opendeck\EBWebView`, not under `%APPDATA%\opendeck`, so the localStorage value was not inspected directly.
 - Apply/Reset, drag-and-drop, plugin property-inspector content, hover/pressed states and real WCAG contrast ratios were not exercised, per the task restrictions.
+
+## Follow-up - CSS grid layout check (same day)
+
+After replacing CSS zoom with a CSS Grid, the app was rebuilt and launched again. UI Automation bounding rectangles of the 18 keypad cells were measured at three window widths. Rectangles were filtered to 6 cells per row with names starting `Key A`/`Key B`/`Key C` and width below 200px, excluding the combined row containers.
+
+| Window width | Cells per row | Tile width | Horizontal gap | Vertical gap | Right-edge delta across rows | Result     |
+| ------------ | ------------- | ---------- | -------------- | ------------ | ---------------------------- | ---------- |
+| 1280         | 6             | 95px       | 13px           | 14px         | 0,0,0,0,0,0                  | no overlap |
+| 1100         | 6             | 123px      | 13/14px        | 14px         | 0,0,0,0,0,0                  | no overlap |
+| 960          | 6             | 110px      | 14px           | 14px         | 0,0,0,0,0,0                  | no overlap |
+
+Positive gaps and identical column right edges mean tiles do not intersect and the sixth column is aligned. Minimum tile sizes (95px at 1280, 110px at 960) exceed the 72px/56px targets; maximum stays below 132px. `zoom` and tile `transform: scale()` are gone from the device grid.
+
+The action library starts collapsed below 1400px, the sidebar collapses to 64px below 1100px, and the inspector uses `clamp(280px, 24vw, 360px)` with an overlay position below 1100px. No Apply/Reset was clicked and no profile or setting was changed. The app, WebView, dev server and plugin processes were terminated afterwards; the pre-existing zombie `opendeck.exe` PID 23504 remains.

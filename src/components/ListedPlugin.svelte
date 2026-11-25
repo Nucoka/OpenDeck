@@ -10,7 +10,7 @@
 	export let actionLabel: string = "";
 	export let secondaryAction: (() => void) | undefined = undefined;
 	export let secondaryActionLabel: string = "";
-	export let status: string = "running";
+	export let status: string = "";
 	export let exitCode: number | null = null;
 	export let description: string = "";
 	export let actionVisible: boolean = true;
@@ -22,16 +22,18 @@
 		<div class="min-w-0 flex-1">
 			<p class="flex flex-wrap items-center gap-2 font-semibold text-app-text">
 				<span class="truncate">{name}</span>
-				<span
-					class="rounded border border-app-border px-1 text-xs"
-					class:text-app-success={status === "running"}
-					class:text-app-warning={status === "crashed" || status === "restarting"}
-					class:text-app-danger={status === "failed"}
-					title={$t(`plugin_manager.status.${status}`)}
-				>
-					{$t(`plugin_manager.status.${status}`)}{#if (status === "crashed" || status === "failed") && exitCode !== null}
-						({exitCode}){/if}
-				</span>
+				{#if status}
+					<span
+						class="rounded border border-app-border px-1 text-xs"
+						class:text-app-success={status === "running"}
+						class:text-app-warning={status === "crashed" || status === "restarting"}
+						class:text-app-danger={status === "failed"}
+						title={$t(`plugin_manager.status.${status}`)}
+					>
+						{$t(`plugin_manager.status.${status}`)}{#if (status === "crashed" || status === "failed") && exitCode !== null}
+							({exitCode}){/if}
+					</span>
+				{/if}
 			</p>
 			<div class="mt-0.5 text-xs text-app-muted" class:opacity-75={disconnected}>
 				<slot name="subtitle">{subtitle}</slot>

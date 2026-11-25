@@ -160,6 +160,7 @@
 	<span id="grid-description" class="sr-only">{$t("device_view.grid_description")}</span>
 	<div
 		class="device-grid-shell flex flex-col justify-center grow overflow-hidden px-8 py-6"
+		style={`--cols: ${device.columns}; --grid-gap: 10px`}
 		class:items-center={device.columns <= 9}
 		class:hidden={$inspectedParentAction || selectedDevice != device.id}
 		role="grid"
@@ -171,11 +172,11 @@
 		on:keydown|capture={handleGridKeydown}
 		on:focusin={handleGridFocusin}
 	>
-		<div class="device-grid-scale" style={`--grid-columns: ${device.columns}`}>
+		<div class="device-grid-frame">
 			<div class="rounded-xl border border-app-border bg-app-panel p-4" role="presentation">
-				<div class="flex flex-col" role="rowgroup">
+				<div class="device-key-grid" role="rowgroup">
 					{#each { length: device.rows } as _, r}
-						<div class="flex flex-row" role="row">
+						<div class="device-grid-row" role="row">
 							{#each { length: device.columns } as _, c}
 								<Key
 									context={{ device: device.id, profile: profile.id, controller: "Keypad", position: r * device.columns + c }}
@@ -195,7 +196,7 @@
 			</div>
 
 			{#if device.encoders > 0}
-				<div class="mt-4 flex flex-row justify-between rounded-xl border border-app-border bg-app-panel p-4" role="row" style={`width: ${keypadRowWidth}px;`}>
+				<div class="device-aux-row mt-4 rounded-xl border border-app-border bg-app-panel p-4" role="row">
 					{#each { length: device.encoders } as _, i}
 						<Key
 							context={{ device: device.id, profile: profile.id, controller: "Encoder", position: i }}
@@ -213,7 +214,7 @@
 			{/if}
 
 			{#if device.touchpoints > 0}
-				<div class="mt-4 flex flex-row items-center rounded-xl border border-app-border bg-app-panel p-4" role="row">
+				<div class="device-aux-row mt-4 rounded-xl border border-app-border bg-app-panel p-4" role="row">
 					{#each { length: device.touchpoints } as _, i}
 						<!-- On the Stream Deck Neo, the infobar display sits physically between the two touchpoints. -->
 						{#if device.infobars > 0 && i === 1}
@@ -253,11 +254,26 @@
 {/key}
 
 <style>
-	.device-grid-shell {
-		container-type: inline-size;
+	.device-grid-frame,
+	.device-aux-row {
+		width: 100%;
+		max-width: calc(var(--cols) * 132px + (var(--cols) - 1) * var(--grid-gap));
+		margin-inline: auto;
 	}
 
-	.device-grid-scale {
-		zoom: min(1, calc(100cqw / (var(--grid-columns) * 132px + 32px)));
+	.device-key-grid {
+		display: grid;
+		grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+		gap: var(--grid-gap);
+	}
+
+	.device-grid-row {
+		display: contents;
+	}
+
+	.device-aux-row {
+		display: grid;
+		grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+		gap: var(--grid-gap);
 	}
 </style>

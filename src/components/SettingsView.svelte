@@ -65,8 +65,8 @@
 	</svelte:fragment>
 
 	{#if $settings}
-		<section class="mx-2 mb-4">
-			<h3 class="mb-2 font-semibold text-app-accent">{$t("settings.section.display")}</h3>
+		<section class="mx-2 mb-6">
+			<h3 class="mb-3 font-semibold text-app-accent">{$t("settings.section.display")}</h3>
 			<div class="flex flex-row items-center mx-2 mb-2 space-x-2">
 				<label for="settings-language" class="text-app-muted">{$t("settings.language")}</label>
 				<div class="select-wrapper">
@@ -99,8 +99,8 @@
 			</div>
 		</section>
 
-		<section class="mx-2 mb-4">
-			<h3 class="mb-2 font-semibold text-app-accent">{$t("settings.section.behavior")}</h3>
+		<section class="mx-2 mb-6">
+			<h3 class="mb-3 font-semibold text-app-accent">{$t("settings.section.behavior")}</h3>
 			<div class="flex flex-row items-center m-2 space-x-2">
 				<label for="settings-sleep_timeout_minutes" class="text-app-muted">{$t("settings.sleep_timeout_minutes")}</label>
 				<input
@@ -127,8 +127,8 @@
 			</div>
 		</section>
 
-		<section class="mx-2 mb-4">
-			<h3 class="mb-2 font-semibold text-app-accent">{$t("settings.section.system")}</h3>
+		<section class="mx-2 mb-6">
+			<h3 class="mb-3 font-semibold text-app-accent">{$t("settings.section.system")}</h3>
 			<div class="flex flex-row items-center m-2 space-x-2">
 				<label for="settings-autolaunch" class="text-app-muted">{$t("settings.autolaunch")}</label>
 				<input type="checkbox" bind:checked={$settings.autolaunch} id="settings-autolaunch" />
@@ -177,8 +177,8 @@
 		</section>
 	{/if}
 
-	<section class="mx-2 mb-4">
-		<h3 class="mb-2 font-semibold text-app-accent">{$t("settings.section.config")}</h3>
+	<section class="mx-2 mb-6">
+		<h3 class="mb-3 font-semibold text-app-accent">{$t("settings.section.config")}</h3>
 		<div class="ml-2">
 			<div class="flex flex-row my-3 space-x-2">
 				<button

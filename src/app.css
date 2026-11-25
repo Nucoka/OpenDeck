@@ -281,3 +281,39 @@ input[type="radio"] {
 .empty-state {
 	@apply flex flex-col items-center justify-center gap-2 p-6 text-center text-sm text-app-muted;
 }
+
+.app-sidebar {
+	width: 176px;
+}
+
+.action-rail {
+	width: 224px;
+}
+
+.action-rail.collapsed {
+	width: 48px;
+}
+
+.inspector-panel {
+	width: clamp(280px, 24vw, 360px);
+}
+
+@media (max-width: 1099px) {
+	.app-sidebar {
+		width: 64px;
+	}
+
+	.app-sidebar .side-row span,
+	.app-sidebar .brand-label {
+		display: none;
+	}
+
+	.inspector-panel {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 20;
+		box-shadow: -12px 0 32px rgb(0 0 0 / 35%);
+	}
+}
