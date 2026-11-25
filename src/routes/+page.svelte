@@ -25,6 +25,7 @@
 	import ParentActionView from "../components/ParentActionView.svelte";
 	import PhotoWall from "../components/PhotoWall.svelte";
 	import PluginManager from "../components/PluginManager.svelte";
+	import ProfilePage from "../components/ProfilePage.svelte";
 	import PropertyInspectorView from "../components/PropertyInspectorView.svelte";
 	import SettingsView from "../components/SettingsView.svelte";
 
@@ -196,6 +197,8 @@
 				<div class="page-panel h-full">
 					<SettingsView inline />
 				</div>
+			{:else if selectedDevice && devices[selectedDevice] && selectedProfiles[selectedDevice]}
+				<ProfilePage bind:device={devices[selectedDevice]} bind:profile={selectedProfiles[selectedDevice]} />
 			{:else}
 				<div class="empty-state">{$t("v2.profile.placeholder")}</div>
 			{/if}

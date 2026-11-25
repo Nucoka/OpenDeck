@@ -41,3 +41,9 @@ Not verified: no GUI run, and Apply/Reset were intentionally not clicked.
 Done: two-column card layout with rows (name + description left, control right). Left column: General and Behavior; right column: Appearance, Data and Advanced. All existing app settings remain, including the numeric Sleep value and the platform-conditional separate Wine prefixes, which was kept in Advanced. Accent, Glass blur and Background motion are stored in `localStorage` via `appearance.ts`; no Light theme was added. Data actions keep their existing backup, restore and folder-opening calls.
 
 Not verified: no GUI run, so control alignment and localStorage persistence were not observed.
+
+## Step 6 - Profile page
+
+Done: device summary card with real name, id, key count, unique plugin count and profile count; profile cards with a cheap coloured mini-grid, active state, and click-to-switch through the existing `ProfileManager.setProfile` flow; a New profile card using the same switching/creation path; and a Manage profiles block reusing the existing ProfileManager popup for rename, delete and application profiles. Mini-previews use action presence only, not images. No firmware, serial number or fake metrics were added. No Tauri command signatures or handlers were changed; the page calls the same existing commands through the existing component API.
+
+Not verified: no GUI run, so switching behaviour and card layout were not observed.
