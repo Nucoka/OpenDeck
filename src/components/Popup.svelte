@@ -24,7 +24,7 @@
 	<div
 		bind:this={popupEl}
 		class={inline
-			? "glass flex h-full min-h-0 w-full flex-col overflow-hidden rounded-[20px] border border-app-border bg-app-card/90"
+			? "glass flex min-h-full w-full flex-col overflow-visible rounded-[20px] border border-app-border bg-app-card/90"
 			: "glass absolute left-0 top-0 m-2 h-[calc(100%-1rem)] w-[calc(100%-1rem)] overflow-auto rounded-[20px] border border-app-border bg-app-card/90 p-4 z-30"}
 		class:flex={!inline && ($$slots.header || $$slots.footer)}
 		class:flex-col={!inline && ($$slots.header || $$slots.footer)}
@@ -37,7 +37,7 @@
 				<slot name="header" />
 			</div>
 		{/if}
-		<div class="min-h-0 flex-1" class:overflow-auto={$$slots.header || $$slots.footer}>
+		<div class="min-h-0 flex-1" class:overflow-auto={!inline && ($$slots.header || $$slots.footer)}>
 			<slot />
 		</div>
 		{#if $$slots.footer}

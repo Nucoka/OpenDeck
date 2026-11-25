@@ -161,7 +161,7 @@
 {#key device}
 	<span id="grid-description" class="sr-only">{$t("device_view.grid_description")}</span>
 	<div
-		class="device-grid-shell flex flex-col justify-center grow overflow-hidden px-8 py-6"
+		class="device-grid-shell flex flex-col justify-center grow overflow-visible px-8 py-6"
 		style={`--cols: ${device.columns}; --grid-gap: 12px`}
 		class:items-center={device.columns <= 9}
 		class:hidden={$inspectedParentAction || selectedDevice != device.id}
@@ -264,7 +264,7 @@
 	.device-grid-frame,
 	.device-aux-row {
 		width: 100%;
-		max-width: 100%;
+		max-width: calc(var(--cols) * 132px + (var(--cols) - 1) * var(--grid-gap));
 		margin-inline: auto;
 		border-radius: 24px;
 		background: linear-gradient(180deg, rgb(255 255 255 / 3%), transparent 60%), var(--color-app-card);
@@ -276,7 +276,9 @@
 	.device-key-grid,
 	.device-aux-row {
 		display: grid;
-		grid-template-columns: repeat(var(--cols), minmax(0, 132px));
+		grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+		align-items: center;
+		justify-items: center;
 		justify-content: center;
 		gap: var(--grid-gap);
 	}

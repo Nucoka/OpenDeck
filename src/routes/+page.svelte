@@ -152,9 +152,9 @@
 			</div>
 		</header>
 
-		<main id="main-content" class="page-area relative min-h-0 grow overflow-auto p-5">
+		<main id="main-content" class="page-area relative min-h-0 grow overflow-x-hidden overflow-y-auto overscroll-contain p-5">
 			{#if currentPage === "devices"}
-				<div class="flex h-full min-h-0 gap-4">
+				<div class="flex min-h-full gap-4">
 					<aside
 						class="action-rail flex shrink-0 flex-col overflow-hidden rounded-[20px] border border-app-border bg-app-card"
 						class:collapsed={actionsCollapsed}

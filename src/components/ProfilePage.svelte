@@ -10,11 +10,33 @@
 	import { profileManager } from "$lib/singletons";
 
 	import { invoke } from "@tauri-apps/api/core";
+	import { onMount } from "svelte";
+
+	const BACKGROUND_KEY = "opendeck.v2.profileBackgrounds";
 
 	export let device: DeviceInfo;
 	export let profile: Profile;
 
 	let profiles: string[] = [];
+	let backgrounds: Record<string, string> = {};
+
+	onMount(() => {
+		try {
+			const raw = localStorage.getItem(BACKGROUND_KEY);
+			if (raw) backgrounds = JSON.parse(raw) as Record<string, string>;
+		} catch {
+			// Ignore unavailable local storage.
+		}
+	});
+
+	function setBackground(id: string, color: string) {
+		backgrounds = { ...backgrounds, [id]: color };
+		try {
+			localStorage.setItem(BACKGROUND_KEY, JSON.stringify(backgrounds));
+		} catch {
+			// Ignore unavailable local storage.
+		}
+	}
 
 	$: if (device?.id) void loadProfiles(device.id);
 	$: keyCount = profile ? [...profile.keys, ...profile.sliders, ...profile.infobars].filter((instance) => instance != null).length : 0;
@@ -74,14 +96,34 @@
 			<div class="empty-state">{$t("v2.profile.empty")}</div>
 		{/if}
 		{#each profiles as id}
-			<button class="profile-card" class:profile-card-active={profile?.id === id} on:click={() => void switchProfile(id)}>
+			<button
+				class="profile-card"
+				class:profile-card-active={profile?.id === id}
+				style:background={backgrounds[id]
+					? `linear-gradient(135deg, color-mix(in srgb, ${backgrounds[id]} 35%, transparent), transparent 70%), var(--color-app-card)`
+					: undefined}
+				on:click={() => void switchProfile(id)}
+			>
 				<div class="profile-preview" style={`--cols: ${device.columns}; --rows: ${device.rows}`}>
 					{#each { length: device.rows * device.columns } as _, i}
 						<span class:profile-key-set={Boolean(profile?.keys[i])}></span>
 					{/each}
 				</div>
-				<div class="truncate text-sm font-semibold text-app-text">{id}</div>
-				<div class="text-xs text-app-muted">{profile?.id === id ? $t("v2.profile.active") : $t("v2.profile.clickToSwitch")}</div>
+				<div class="flex w-full flex-row items-center justify-between gap-2">
+					<div class="min-w-0">
+						<div class="truncate text-sm font-semibold text-app-text">{id}</div>
+						<div class="text-xs text-app-muted">{profile?.id === id ? $t("v2.profile.active") : $t("v2.profile.clickToSwitch")}</div>
+					</div>
+					<input
+						type="color"
+						class="size-8 shrink-0 cursor-pointer rounded-[10px] border border-app-border bg-transparent"
+						value={backgrounds[id] ?? "#4F6BFF"}
+						aria-label={$t("v2.profile.backgroundColor")}
+						title={$t("v2.profile.backgroundColor")}
+						on:click|stopPropagation
+						on:change|stopPropagation={(event) => setBackground(id, event.currentTarget.value)}
+					/>
+				</div>
 			</button>
 		{/each}
 

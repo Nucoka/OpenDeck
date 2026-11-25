@@ -59,3 +59,9 @@ Not verified: no GUI run, so actual focus order, screen-reader output and render
 Done: device grid now uses centred `minmax(0, 132px)` tracks with a 12px gap, soft elevated card surfaces, 14px rounded keys, hover lift and a stronger accent ring/glow. Key count footer aligns to the grid width. Profile grid uses `auto-fill` with a 220px minimum. Cards, settings panels and the page surface gained subtle gradients and shadows. No logic, handlers or Tauri calls changed.
 
 Not verified: no GUI run; spacing and shadow intensity need visual confirmation.
+
+## Follow-up - scroll and grid fix
+
+Done: main area now scrolls reliably (`overflow-y-auto`, `overscroll-contain`, no horizontal clipping). Page panels and inline popups use `min-height: 100%` with visible overflow so long Settings/Plugins/Photo wall content reaches the scroll container. Device grid tracks fill the frame evenly with `minmax(0, 1fr)`, capped at 132px per key and centred. Each profile card now has a custom background colour picker stored in `localStorage` under `opendeck.v2.profileBackgrounds`; clicking the picker does not switch profiles.
+
+Not verified: no GUI run, so wheel scrolling and the new gradient background were not observed.

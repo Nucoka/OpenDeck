@@ -234,6 +234,7 @@
 	"v2.plugins.subtitle": "Installed plugins and the plugin store",
 	"v2.plugins.title": "Plugins",
 	"v2.profile.active": "Active now",
+	"v2.profile.backgroundColor": "Custom background colour",
 	"v2.profile.clickToSwitch": "Click to switch",
 	"v2.profile.connected": "Connected",
 	"v2.profile.empty": "No profiles found for this device.",
