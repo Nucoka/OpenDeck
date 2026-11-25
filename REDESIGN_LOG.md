@@ -76,3 +76,7 @@ Done: removed the 112/144 inner scale from `Key`, so a normal key now occupies t
 ## Visual-fix 3 - Photo wall column persistence
 
 Done: `Columns with screens` is stored in `localStorage` under `opendeck.photoWall.screenColumns`, restored on mount with clamping to the current device, and written back on change. No Rust or settings-store changes. Not verified across an actual app restart; storage errors are swallowed on purpose.
+
+## Visual-fix 4 - form accent colour
+
+Done: added a `--accent` alias for the accent token and a global `accent-color` rule for range, checkbox and radio inputs, replacing the browser's blue default. Not verified in GUI.

@@ -21,6 +21,10 @@
 	--color-app-danger: #f87171;
 }
 
+:root {
+	--accent: var(--color-app-accent);
+}
+
 body {
 	font-family: var(--font-sans);
 }
@@ -86,6 +90,12 @@ input[type="checkbox"],
 input[type="range"],
 input[type="color"] {
 	@apply cursor-pointer;
+}
+
+input[type="range"],
+input[type="checkbox"],
+input[type="radio"] {
+	accent-color: var(--accent);
 }
 
 .select-wrapper {
