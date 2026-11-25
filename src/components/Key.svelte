@@ -278,9 +278,21 @@
 	.key-tile {
 		width: 100%;
 		overflow: hidden;
-		border: 2px solid var(--color-app-border);
-		border-radius: 12px;
-		background: var(--color-app-bg);
+		border: 1px solid var(--color-app-border);
+		border-radius: 14px;
+		background: linear-gradient(180deg, rgb(255 255 255 / 4%), rgb(255 255 255 / 0%)), var(--color-app-card);
+		box-shadow:
+			0 8px 20px rgb(0 0 0 / 28%),
+			inset 0 1px 0 rgb(255 255 255 / 5%);
+		transition:
+			transform 160ms ease,
+			box-shadow 160ms ease,
+			border-color 160ms ease;
+	}
+
+	.key-tile:hover:not(.key-selected) {
+		border-color: color-mix(in srgb, var(--accent) 40%, var(--color-app-border));
+		transform: translateY(-1px);
 	}
 
 	.key-tile canvas {
@@ -288,17 +300,20 @@
 	}
 
 	.key-tile.key-selected {
+		border-color: var(--color-app-accent);
 		box-shadow:
 			0 0 0 2px var(--color-app-accent),
-			0 0 18px color-mix(in srgb, var(--accent) 35%, transparent);
+			0 0 24px color-mix(in srgb, var(--accent) 35%, transparent),
+			0 10px 24px rgb(0 0 0 / 30%);
 	}
 
 	.key-tile.key-empty {
 		border-style: dashed;
-		background: transparent;
+		background: rgb(255 255 255 / 2%);
+		box-shadow: none;
 	}
 
 	.key-plus {
-		opacity: 0.65;
+		opacity: 0.55;
 	}
 </style>

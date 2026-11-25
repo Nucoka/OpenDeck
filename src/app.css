@@ -320,7 +320,8 @@ input[type="radio"] {
 	overflow: hidden;
 	border: 1px solid var(--color-app-border);
 	border-radius: 20px;
-	background: var(--color-app-card);
+	background: linear-gradient(180deg, rgb(255 255 255 / 3%), transparent 60%), var(--color-app-card);
+	box-shadow: 0 20px 60px rgb(0 0 0 / 30%);
 }
 
 .primary-button {
@@ -336,7 +337,9 @@ input[type="radio"] {
 }
 
 .settings-card {
-	@apply rounded-[20px] border border-app-border bg-app-card p-4;
+	@apply rounded-[20px] border border-app-border p-4;
+	background: linear-gradient(180deg, rgb(255 255 255 / 3%), transparent 60%), var(--color-app-card);
+	box-shadow: 0 12px 32px rgb(0 0 0 / 24%);
 }
 
 .settings-row {
@@ -355,8 +358,16 @@ input[type="radio"] {
 	@apply border-white;
 }
 
+.profile-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+	gap: 16px;
+}
+
 .profile-card {
-	@apply flex flex-col items-start gap-2 rounded-[20px] border border-app-border bg-app-card p-4 text-left transition-colors hover:border-app-accent;
+	@apply flex flex-col items-start gap-2 rounded-[20px] border border-app-border p-4 text-left transition-colors hover:border-app-accent;
+	background: linear-gradient(180deg, rgb(255 255 255 / 3%), transparent 60%), var(--color-app-card);
+	box-shadow: 0 12px 32px rgb(0 0 0 / 24%);
 }
 
 .profile-card-active {

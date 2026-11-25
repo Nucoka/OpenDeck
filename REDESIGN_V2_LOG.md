@@ -53,3 +53,9 @@ Not verified: no GUI run, so switching behaviour and card layout were not observ
 Done: 2px accent focus ring extended to links, summaries, list options and focusable containers; a keyboard skip link was added; sidebar items expose `aria-current`; empty states were unified for the action library, installed plugins and profile grid; hover/pressed/disabled states were added for cards, chips, swatches and buttons. Contrast was checked in source only: muted text `#8B8B94` on `#0B0B0E` and white text on the primary button exceed AA ratios.
 
 Not verified: no GUI run, so actual focus order, screen-reader output and rendered contrast were not observed.
+
+## Follow-up - grid polish
+
+Done: device grid now uses centred `minmax(0, 132px)` tracks with a 12px gap, soft elevated card surfaces, 14px rounded keys, hover lift and a stronger accent ring/glow. Key count footer aligns to the grid width. Profile grid uses `auto-fill` with a 220px minimum. Cards, settings panels and the page surface gained subtle gradients and shadows. No logic, handlers or Tauri calls changed.
+
+Not verified: no GUI run; spacing and shadow intensity need visual confirmation.

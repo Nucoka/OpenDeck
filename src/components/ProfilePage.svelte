@@ -69,7 +69,7 @@
 		</div>
 	</section>
 
-	<div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+	<div class="profile-grid">
 		{#if profiles.length === 0}
 			<div class="empty-state">{$t("v2.profile.empty")}</div>
 		{/if}
