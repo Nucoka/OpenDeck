@@ -192,7 +192,7 @@
 		label + (slot ? ": " + slot.action.name + (state?.show && (state?.text_override || state?.text) ? " - " + (state.text_override || state.text) : "") : "");
 </script>
 
-<div class="relative" style={`transform: scale(${(112 /* desired inner size */ / size) * scale});`}>
+<div class="relative" style={`transform: scale(${scale});`}>
 	<canvas
 		bind:this={canvas}
 		class="relative border-2 border-app-border rounded-xl outline-none outline-offset-2 outline-app-accent"
