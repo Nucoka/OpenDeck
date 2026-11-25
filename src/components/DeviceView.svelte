@@ -87,6 +87,8 @@
 	$: encoderRowIndex = device.rows;
 	$: touchpointRowIndex = device.rows + (device.encoders > 0 ? 1 : 0);
 	$: keypadRowWidth = device.columns * 132;
+	$: selectedPosition = typeof $inspectedInstance === "string" ? parseInt($inspectedInstance.split(".")[3] ?? "-1") : -1;
+	$: totalKeys = device.rows * device.columns + device.touchpoints;
 
 	function flatIndexFromRowCol(row: number, col: number): number {
 		let index = 0;
@@ -160,7 +162,7 @@
 	<span id="grid-description" class="sr-only">{$t("device_view.grid_description")}</span>
 	<div
 		class="device-grid-shell flex flex-col justify-center grow overflow-hidden px-8 py-6"
-		style={`--cols: ${device.columns}; --grid-gap: 10px`}
+		style={`--cols: ${device.columns}; --grid-gap: 8px`}
 		class:items-center={device.columns <= 9}
 		class:hidden={$inspectedParentAction || selectedDevice != device.id}
 		role="grid"
@@ -173,7 +175,7 @@
 		on:focusin={handleGridFocusin}
 	>
 		<div class="device-grid-frame">
-			<div class="rounded-xl border border-app-border bg-app-panel p-4" role="presentation">
+			<div class="rounded-[20px] border border-app-border bg-app-card p-4" role="presentation">
 				<div class="device-key-grid" role="rowgroup">
 					{#each { length: device.rows } as _, r}
 						<div class="device-grid-row" role="row">
@@ -249,6 +251,11 @@
 					{/each}
 				</div>
 			{/if}
+		</div>
+
+		<div class="device-grid-footer mt-3 flex w-full flex-row justify-between text-xs text-app-muted">
+			<span class="truncate">{device.name} · {profile.id}</span>
+			<span>{$t("v2.devices.keyCount", { n: selectedPosition >= 0 ? selectedPosition + 1 : 0, total: totalKeys })}</span>
 		</div>
 	</div>
 {/key}

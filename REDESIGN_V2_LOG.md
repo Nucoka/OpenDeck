@@ -17,3 +17,9 @@ Done: new colour tokens (`app-bg`, `app-panel`, `app-card`, `app-border`, `app-t
 Not verified: no GUI run, so visual similarity to the mockups, contrast and blur appearance were not observed.
 
 Symbol check: the required grep matches existing `translations/ko.json` content and language option labels in `SettingsView`. Those are localization data, not new text added by the redesign; no Chinese/Arabic/Korean characters were added to source comments or UI strings by this step.
+
+## Step 2 - Devices and Actions panel
+
+Done: grid gap is 8px with a 20px card, empty keypad cells show a dashed border and plus, selected keys get a 2px accent ring plus glow, and a footer shows `device · profile` and `Key N of M`. Inspector tabs are named Key / Action; the Key tab now has Preview, Title and Image sections with a Choose file button and the plugin-icon hint. The Actions panel is a 270px drawer with search, category chips built from real category names without duplicates, compact rows and the drag hint. Clicking an action does not assign it; only the existing drag-and-drop handler assigns actions to keys.
+
+Not verified: no GUI run, so panel behaviour, focus and visual spacing were not observed.

@@ -82,6 +82,7 @@
 			<button class="ml-2 mr-1 float-right text-xl text-app-text" on:click={() => (showEditor = false)} aria-label={$t("settings.close")}>✕</button>
 		{/if}
 	</div>
+	<h3 class="v2-section-title">{$t("v2.inspector.preview")}</h3>
 	<div class="flex flex-row mx-1">
 		<div class="flex flex-col justify-center items-center mt-2 mb-1">
 			<button
@@ -188,6 +189,13 @@
 				/>
 			</button>
 		</div>
+		<h3 class="v2-section-title">{$t("v2.inspector.imageLabel")}</h3>
+		<div class="mx-1 mb-2 flex flex-row flex-wrap items-center gap-2">
+			<button class="secondary-button" on:click={() => fileInput.click()}>{$t("v2.inspector.chooseFile")}</button>
+			{#if !instance.states[state].image_override}
+				<span class="text-xs text-app-muted">{$t("v2.inspector.imageHint")}</span>
+			{/if}
+		</div>
 		<input
 			bind:this={fileInput}
 			type="file"
@@ -211,6 +219,7 @@
 		/>
 
 		<div class="flex flex-col justify-center pl-4 pr-2 pt-4 pb-2 space-y-2">
+			<h3 class="v2-section-title">{$t("v2.inspector.titleLabel")}</h3>
 			<div class="flex flex-row items-center space-x-2">
 				<label for="editor-text">{$t("instance_editor.text")}</label>
 				<textarea

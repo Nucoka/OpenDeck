@@ -20,7 +20,9 @@
 	reload();
 
 	let query: string = "";
+	let activeCategory: string | null = null;
 	let filteredCategories: [string, { icon?: string; actions: Action[] }][] = [];
+	$: categoryChips = Array.from(new Set(Object.keys(categories)));
 	$: {
 		let lowerCaseQuery = query.toLowerCase().trim();
 		filteredCategories = Object.entries(categories)
@@ -31,7 +33,7 @@
 				}
 				return [categoryName, { icon, actions }];
 			})
-			.filter(([_, { actions }]) => actions.length > 0);
+			.filter(([name, { actions }]) => actions.length > 0 && (!activeCategory || name === activeCategory));
 	}
 
 	function handleListKeydown(event: KeyboardEvent) {
@@ -76,61 +78,90 @@
 	}
 </script>
 
-<div class="flex h-full w-full flex-col bg-app-panel">
-	<div class="flex flex-row items-center m-2 bg-app-elevated border border-app-border rounded-lg">
-		<MagnifyingGlass size="13" class="ml-2 mr-1 text-app-text" />
-		<input bind:value={query} class="w-full p-1 text-sm text-app-text" placeholder={$t("action_list.search_placeholder")} type="search" spellcheck="false" />
+<div class="flex h-full w-full flex-col bg-app-card">
+	<div class="m-3 flex flex-row items-center rounded-xl border border-app-border bg-app-elevated">
+		<MagnifyingGlass size={14} class="ml-3 mr-1 text-app-muted" />
+		<input
+			bind:value={query}
+			class="w-full bg-transparent p-2 text-xs text-app-text"
+			placeholder={$t("action_list.search_placeholder")}
+			type="search"
+			spellcheck="false"
+		/>
+	</div>
+
+	<div class="mx-3 flex flex-row flex-wrap gap-2">
+		<button class="action-chip" class:action-chip-active={activeCategory === null} on:click={() => (activeCategory = null)}>
+			{$t("v2.actions.all")}
+		</button>
+		{#each categoryChips as category}
+			<button class="action-chip" class:action-chip-active={activeCategory === category} on:click={() => (activeCategory = category)}>
+				{category}
+			</button>
+		{/each}
 	</div>
 
 	<span id="action-list-hint" class="sr-only">{$t("action_list.hint")}</span>
-	<div class="grow overflow-auto select-none divide-y divide-app-border!">
-		{#each filteredCategories as [name, { icon, actions }]}
-			<details open>
-				<summary class="pl-4 py-3 text-lg font-semibold text-app-text hover:bg-app-elevated cursor-pointer">
-					{#if icon || (actions[0] && plugins.find((x) => x.id == actions[0].plugin) && categories[name].actions.every((x) => x.plugin == actions[0].plugin))}
+	<div class="mt-3 grow overflow-auto select-none">
+		{#each filteredCategories as [categoryName, { actions }]}
+			<div class="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-app-muted">{categoryName}</div>
+			<div
+				role="listbox"
+				aria-label={categoryName}
+				aria-describedby="action-list-hint"
+				tabindex="-1"
+				on:keydown={handleListKeydown}
+				on:focusin={handleListFocusin}
+			>
+				{#each actions as action, i}
+					<div
+						class="mx-2 mb-1 flex flex-row items-center gap-3 rounded-xl border border-transparent p-2 hover:border-app-border hover:bg-app-elevated cursor-grab active:cursor-grabbing"
+						draggable="true"
+						title={$localisations?.[action.plugin]?.[action.uuid]?.Tooltip ?? action.tooltip}
+						role="option"
+						aria-selected="false"
+						tabindex={i == 0 ? 0 : -1}
+						aria-label={$localisations?.[action.plugin]?.[action.uuid]?.Name ?? action.name}
+						on:dragstart={(event) => {
+							if (!event.dataTransfer) return;
+							event.dataTransfer.effectAllowed = "copy";
+							event.dataTransfer.setData("action", JSON.stringify(action));
+						}}
+						on:keydown={(event) => {
+							if ((event.ctrlKey || event.metaKey) && event.key == "c") {
+								copiedItem.set({ type: "action", action });
+							}
+						}}
+					>
 						<img
-							src={icon
-								? !icon.startsWith("opendeck/")
-									? getWebserverUrl(icon)
-									: icon.replace("opendeck", "")
-								: getWebserverUrl(plugins.find((x) => x.id == actions[0].plugin).icon)}
-							alt={name}
-							class="w-5 h-5 rounded-xs ml-1 -mt-1 inline"
+							src={!action.icon.startsWith("opendeck/") ? getWebserverUrl(action.icon) : action.icon.replace("opendeck", "")}
+							alt=""
+							class="size-8 shrink-0 rounded-[10px] border border-app-border pointer-events-none"
 						/>
-					{/if}
-					<span class="ml-1">{name}</span>
-				</summary>
-				<div role="listbox" aria-label={name} aria-describedby="action-list-hint" tabindex="-1" on:keydown={handleListKeydown} on:focusin={handleListFocusin}>
-					{#each actions as action, i}
-						<div
-							class="flex flex-row items-center p-2 pl-6 bg-app-bg hover:bg-app-panel border-t border-app-border cursor-grab active:cursor-grabbing"
-							draggable="true"
-							title={$localisations?.[action.plugin]?.[action.uuid]?.Tooltip ?? action.tooltip}
-							role="option"
-							aria-selected="false"
-							tabindex={i == 0 ? 0 : -1}
-							aria-label={$localisations?.[action.plugin]?.[action.uuid]?.Name ?? action.name}
-							on:dragstart={(event) => {
-								if (!event.dataTransfer) return;
-								event.dataTransfer.effectAllowed = "copy";
-								event.dataTransfer.setData("action", JSON.stringify(action));
-							}}
-							on:keydown={(event) => {
-								if ((event.ctrlKey || event.metaKey) && event.key == "c") {
-									copiedItem.set({ type: "action", action });
-								}
-							}}
-						>
-							<img
-								src={!action.icon.startsWith("opendeck/") ? getWebserverUrl(action.icon) : action.icon.replace("opendeck", "")}
-								alt=""
-								class="m-0.5 mr-3 w-11 h-11 rounded-lg border border-app-border pointer-events-none"
-							/>
-							<span class="text-app-muted">{$localisations?.[action.plugin]?.[action.uuid]?.Name ?? action.name}</span>
+						<div class="min-w-0 flex-1">
+							<div class="truncate text-xs text-app-text">{$localisations?.[action.plugin]?.[action.uuid]?.Name ?? action.name}</div>
+							<div class="truncate text-[11px] text-app-muted">{categoryName}</div>
 						</div>
-					{/each}
-				</div>
-			</details>
+					</div>
+				{/each}
+			</div>
 		{/each}
 	</div>
+
+	<div class="shrink-0 border-t border-app-border p-3 text-xs text-app-muted">{$t("v2.actions.hint")}</div>
 </div>
+
+<style>
+	.action-chip {
+		border: 1px solid var(--color-app-border);
+		border-radius: 999px;
+		padding: 4px 10px;
+		font-size: 11px;
+		color: var(--color-app-muted);
+	}
+
+	.action-chip-active {
+		background: #f5f5f7;
+		color: #0b0b0e;
+	}
+</style>

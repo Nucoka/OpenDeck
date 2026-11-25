@@ -1,4 +1,12 @@
 {
+	"v2.actions.all": "All",
+	"v2.actions.hint": "Drag an action onto a key",
+	"v2.devices.keyCount": "Key {{n}} of {{total}}",
+	"v2.inspector.chooseFile": "Choose file",
+	"v2.inspector.imageHint": "Using the icon from the plugin. Changes save automatically.",
+	"v2.inspector.imageLabel": "Image",
+	"v2.inspector.preview": "Preview",
+	"v2.inspector.titleLabel": "Title",
 	"action_list.button": "Actions",
 	"action_list.hint": "Use arrow keys to navigate between actions within a category.",
 	"action_list.search_placeholder": "Search actions",

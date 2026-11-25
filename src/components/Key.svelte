@@ -7,6 +7,7 @@
 	import Clipboard from "phosphor-svelte/lib/Clipboard";
 	import Copy from "phosphor-svelte/lib/Copy";
 	import Pencil from "phosphor-svelte/lib/Pencil";
+	import Plus from "phosphor-svelte/lib/Plus";
 	import Trash from "phosphor-svelte/lib/Trash";
 	import InstanceEditor from "./InstanceEditor.svelte";
 
@@ -195,6 +196,7 @@
 <div
 	class="key-tile relative"
 	class:key-selected={active && ((slot && $inspectedInstance == slot.context) || (context && $inspectedInstance == context))}
+	class:key-empty={!slot && context?.controller == "Keypad"}
 	class:rounded-full!={context?.controller == "Encoder"}
 	class:rounded-lg!={context?.controller == "Infobar"}
 	style:aspect-ratio={width === height ? "1 / 1" : `${width} / ${height}`}
@@ -233,6 +235,10 @@
 	/>
 	{#if isTouchPoint && !slot}
 		<div class="absolute left-1/4 top-1/2 w-1/2 border-t-4 border-app-border pointer-events-none"></div>
+	{:else if !slot && context?.controller == "Keypad"}
+		<div class="key-plus pointer-events-none absolute inset-0 flex items-center justify-center text-app-muted">
+			<Plus size={20} />
+		</div>
 	{/if}
 </div>
 
@@ -282,6 +288,17 @@
 	}
 
 	.key-tile.key-selected {
-		box-shadow: 0 0 0 2px var(--color-app-accent);
+		box-shadow:
+			0 0 0 2px var(--color-app-accent),
+			0 0 18px color-mix(in srgb, var(--accent) 35%, transparent);
+	}
+
+	.key-tile.key-empty {
+		border-style: dashed;
+		background: transparent;
+	}
+
+	.key-plus {
+		opacity: 0.65;
 	}
 </style>
