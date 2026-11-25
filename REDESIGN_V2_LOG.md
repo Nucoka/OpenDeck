@@ -29,3 +29,9 @@ Not verified: no GUI run, so panel behaviour, focus and visual spacing were not 
 Done: the page now has Installed / Store tabs, a single search field and an Install from file button in the header. Installed plugins render as compact rows with 36px icons, status badges with exit codes, Auto-restart toggles, Restart and Uninstall (non-builtin only). Store plugins use the same row style without status badges. Existing restart, auto-restart, uninstall, file install, catalogue and property-inspector calls are unchanged.
 
 Not verified: no GUI run, so row wrapping and tab switching were not observed.
+
+## Step 4 - Photo wall page
+
+Done: two-column page with dropzone, preview card, selected-image thumbnail and eight gradient presets. Right panel holds Mode, Columns with screens (mono value), Gap, background for Fit, Hide labels, and an always-visible "Apply to first N keys" field where empty means All. Footer has Reset (secondary) and Apply to deck (primary). Gradient presets feed a canvas-generated image into the existing `slicePhoto` path; Apply/Reset logic and invoke calls are unchanged.
+
+Not verified: no GUI run, and Apply/Reset were intentionally not clicked.

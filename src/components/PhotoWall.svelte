@@ -11,12 +11,23 @@
 
 	import Popup from "./Popup.svelte";
 
+	import ImageSquare from "phosphor-svelte/lib/ImageSquare";
+
 	import { invoke } from "@tauri-apps/api/core";
 	import { onDestroy, onMount } from "svelte";
 
 	const TILE_DELAY_MS = 120;
 	const SCREEN_COLUMNS_KEY = "opendeck.photoWall.screenColumns";
-	const isDev = (import.meta as ImportMeta & { env: { DEV: boolean } }).env.DEV;
+	const GRADIENTS: [string, string][] = [
+		["#4F6BFF", "#1FB58A"],
+		["#FF5C7A", "#A66BFF"],
+		["#1FB58A", "#0B0B0E"],
+		["#4F6BFF", "#F5F5F7"],
+		["#A66BFF", "#FF5C7A"],
+		["#F5C451", "#FF5C7A"],
+		["#0B0B0E", "#4F6BFF"],
+		["#1FB58A", "#A66BFF"],
+	];
 
 	type TileSnapshot = {
 		position: number;
@@ -151,7 +162,7 @@
 		if (!image || !profile || applying) return;
 
 		const { tiles } = slicePhoto(image, { columns: columnsWithScreens, rows: device.rows, tileWidth, tileHeight, mode, gap, background });
-		total = isDev && limit && limit > 0 ? Math.min(limit, tiles.length) : tiles.length;
+		total = limit && limit > 0 ? Math.min(limit, tiles.length) : tiles.length;
 		error = "";
 		snapshot = [];
 		snapshotDevice = device.id;
@@ -275,6 +286,27 @@
 			error = caught instanceof Error ? caught.message : String(caught);
 		}
 	}
+
+	function useGradient(index: number) {
+		const canvas = document.createElement("canvas");
+		canvas.width = 512;
+		canvas.height = 512;
+		const context = canvas.getContext("2d");
+		if (!context) return;
+		const [from, to] = GRADIENTS[index];
+		const gradient = context.createLinearGradient(0, 0, 512, 512);
+		gradient.addColorStop(0, from);
+		gradient.addColorStop(1, to);
+		context.fillStyle = gradient;
+		context.fillRect(0, 0, 512, 512);
+
+		const preset = new Image();
+		preset.onload = () => {
+			image = preset;
+			error = "";
+		};
+		preset.src = canvas.toDataURL("image/png");
+	}
 </script>
 
 <svelte:window
@@ -289,119 +321,111 @@
 		<h2 class="m-2 font-semibold text-xl text-app-text">{$t("photo_wall.title")}</h2>
 	</svelte:fragment>
 
-	<div class="flex flex-col space-y-3 m-2">
-		<button
-			class="p-6 text-sm text-app-muted bg-app-elevated hover:bg-app-border transition-colors border border-dashed border-app-border rounded-lg"
-			on:click={() => fileInput.click()}
-			on:dragover|preventDefault
-			on:drop|preventDefault={(event) => useFile(event.dataTransfer?.files?.[0])}
-		>
-			{$t("photo_wall.choose")}
-		</button>
-		<input
-			bind:this={fileInput}
-			type="file"
-			accept="image/*"
-			class="hidden"
-			on:change={() => {
-				void useFile(fileInput.files?.[0]);
-				fileInput.value = "";
-			}}
-		/>
-		{#if error}
-			<p class="text-sm text-app-danger">{$t("photo_wall.error")}: {error}</p>
-		{/if}
+	<div class="m-3 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+		<div class="flex min-w-0 flex-col gap-3">
+			<button
+				class="photo-dropzone flex flex-row items-center justify-center gap-2 rounded-[20px] border border-dashed border-app-border bg-app-card p-6 text-xs text-app-muted hover:border-app-accent"
+				on:click={() => fileInput.click()}
+				on:dragover|preventDefault
+				on:drop|preventDefault={(event) => useFile(event.dataTransfer?.files?.[0])}
+			>
+				<ImageSquare size={20} />
+				{$t("photo_wall.chooseImage")}
+			</button>
+			<input
+				bind:this={fileInput}
+				type="file"
+				accept="image/*"
+				class="hidden"
+				on:change={() => {
+					void useFile(fileInput.files?.[0]);
+					fileInput.value = "";
+				}}
+			/>
+			{#if error}
+				<p class="text-sm text-app-danger">{$t("photo_wall.error")}: {error}</p>
+			{/if}
 
-		<div class="flex flex-row items-center space-x-2">
-			<span class="text-app-muted">{$t("photo_wall.mode")}:</span>
-			<div class="flex flex-row overflow-hidden border border-app-border rounded-lg">
-				<button
-					class="px-3 py-1 text-sm text-app-text bg-app-elevated hover:bg-app-border transition-colors"
-					class:bg-app-accent={mode === "cover"}
-					on:click={() => (mode = "cover")}
-				>
-					{$t("photo_wall.mode.cover")}
-				</button>
-				<button
-					class="px-3 py-1 text-sm text-app-text bg-app-elevated hover:bg-app-border transition-colors border-l border-app-border"
-					class:bg-app-accent={mode === "fit"}
-					on:click={() => (mode = "fit")}
-				>
-					{$t("photo_wall.mode.fit")}
-				</button>
+			<div class="rounded-[20px] border border-app-border bg-app-card p-4">
+				<h3 class="v2-section-title mt-0">{$t("photo_wall.preview")}</h3>
+				<canvas bind:this={previewCanvas} class="max-w-full rounded-xl border border-app-border" aria-label={$t("photo_wall.preview")} />
+			</div>
+
+			<div class="flex flex-row flex-wrap gap-2">
+				{#if image}
+					<img src={image.src} alt="" class="size-10 rounded-[10px] border border-app-border object-cover" />
+				{/if}
+				{#each GRADIENTS as _, i}
+					<button
+						class="size-10 rounded-[10px] border border-app-border"
+						style:background={`linear-gradient(135deg, ${GRADIENTS[i][0]}, ${GRADIENTS[i][1]})`}
+						on:click={() => useGradient(i)}
+						aria-label={`Preset ${i + 1}`}
+						title={`Preset ${i + 1}`}
+					></button>
+				{/each}
 			</div>
 		</div>
 
-		<div class="flex flex-row items-center space-x-2">
-			<label for="photo-wall-columns" class="text-app-muted">{$t("photo_wall.screen_columns")}:</label>
-			<input type="range" min="1" max={device.columns} bind:value={screenColumns} id="photo-wall-columns" />
-			<span class="w-8 text-sm text-app-text font-mono tabular-nums">{columnsWithScreens}</span>
-		</div>
-
-		<div class="flex flex-row items-center space-x-2">
-			<label for="photo-wall-gap" class="text-app-muted">{$t("photo_wall.gap")}:</label>
-			<input type="range" min="0" max="80" bind:value={gap} id="photo-wall-gap" />
-			<span class="w-8 text-sm text-app-text font-mono tabular-nums">{gap}</span>
-		</div>
-
-		{#if mode === "fit"}
-			<div class="flex flex-row items-center space-x-2">
-				<label for="photo-wall-background" class="text-app-muted">{$t("photo_wall.background")}:</label>
-				<input type="color" bind:value={background} class="w-8 h-6 bg-app-elevated" id="photo-wall-background" />
+		<div class="flex flex-col gap-4 rounded-[20px] border border-app-border bg-app-card p-4">
+			<div class="flex flex-row items-center gap-2">
+				<span class="text-app-muted">{$t("photo_wall.mode")}:</span>
+				<button class="tab-button" class:tab-active={mode === "cover"} on:click={() => (mode = "cover")}>{$t("photo_wall.mode.cover")}</button>
+				<button class="tab-button" class:tab-active={mode === "fit"} on:click={() => (mode = "fit")}>{$t("photo_wall.mode.fit")}</button>
 			</div>
-		{/if}
 
-		<div class="flex flex-row items-center space-x-2">
-			<input type="checkbox" bind:checked={hideText} class="scale-125" id="photo-wall-hide-text" />
-			<label for="photo-wall-hide-text" class="text-app-muted">{$t("photo_wall.hide_text")}</label>
-		</div>
+			<div class="flex flex-row items-center gap-2">
+				<label for="photo-wall-columns" class="flex-1 text-app-muted">{$t("photo_wall.screen_columns")}</label>
+				<input type="range" min="1" max={device.columns} bind:value={screenColumns} id="photo-wall-columns" />
+				<span class="w-8 text-xs font-mono text-app-text">{columnsWithScreens}</span>
+			</div>
 
-		{#if isDev}
-			<div class="flex flex-row items-center space-x-2">
-				<label for="photo-wall-limit" class="text-app-muted">{$t("photo_wall.limit")}:</label>
+			<div class="flex flex-row items-center gap-2">
+				<label for="photo-wall-gap" class="flex-1 text-app-muted">{$t("photo_wall.gap")}</label>
+				<input type="range" min="0" max="80" bind:value={gap} id="photo-wall-gap" />
+				<span class="w-8 text-xs font-mono text-app-text">{gap}</span>
+			</div>
+
+			{#if mode === "fit"}
+				<div class="flex flex-row items-center gap-2">
+					<label for="photo-wall-background" class="flex-1 text-app-muted">{$t("photo_wall.background")}</label>
+					<input type="color" bind:value={background} class="size-8 rounded-lg bg-app-elevated" id="photo-wall-background" />
+				</div>
+			{/if}
+
+			<label class="flex flex-row items-center gap-2 text-app-muted" for="photo-wall-hide-text">
+				<input type="checkbox" bind:checked={hideText} id="photo-wall-hide-text" />
+				{$t("photo_wall.hide_text")}
+			</label>
+
+			<div class="flex flex-row items-center gap-2">
+				<label for="photo-wall-limit" class="flex-1 text-app-muted">{$t("photo_wall.applyLimit")}</label>
 				<input
 					type="number"
 					min="1"
 					max={device.rows * columnsWithScreens}
 					bind:value={limit}
-					class="w-16 px-1 text-app-text border border-app-border rounded-lg"
+					placeholder={$t("photo_wall.all")}
+					class="w-20 rounded-xl border border-app-border bg-app-elevated px-2 py-1 text-xs font-mono text-app-text"
 					id="photo-wall-limit"
 				/>
 			</div>
-		{/if}
 
-		<h3 class="font-semibold text-app-text">{$t("photo_wall.preview")}</h3>
-		<canvas bind:this={previewCanvas} class="max-w-full border border-app-border rounded-lg" aria-label={$t("photo_wall.preview")} />
+			<p class="text-xs text-app-muted">{$t("photo_wall.reset.warning")}</p>
+		</div>
 	</div>
 
 	<svelte:fragment slot="footer">
-		<div class="flex flex-row items-center justify-end m-2 space-x-2">
+		<div class="m-2 flex flex-row items-center justify-end gap-2">
 			{#if applying || resetting}
-				<span class="text-sm text-app-text font-mono tabular-nums">{$t("photo_wall.progress", { n: progress, total })}</span>
-				<button
-					class="px-3 py-1 text-sm text-app-text bg-app-elevated hover:bg-app-border transition-colors border border-app-border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-					on:click={cancel}
-					disabled={cancelled}
-				>
-					{$t("photo_wall.cancel")}
-				</button>
+				<span class="text-sm font-mono text-app-text">{$t("photo_wall.progress", { n: progress, total })}</span>
+				<button class="secondary-button" on:click={cancel} disabled={cancelled}>{$t("photo_wall.cancel")}</button>
 			{/if}
-			{#if snapshot.length > 0}
-				<span class="text-xs text-app-muted">{$t("photo_wall.reset.warning")}</span>
-				<button
-					class="px-3 py-1 text-sm text-app-text bg-app-elevated hover:bg-app-border transition-colors border border-app-border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-					on:click={() => void reset()}
-					disabled={applying || resetting}
-				>
-					{$t("photo_wall.reset")}
-				</button>
-			{/if}
-			<button
-				class="px-3 py-1 text-sm text-app-text bg-app-elevated hover:bg-app-border transition-colors border border-app-border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-				on:click={() => void apply()}
-				disabled={!image || !profile || applying || resetting}
-			>
-				{$t("photo_wall.apply")}
+			<button class="secondary-button" on:click={() => void reset()} disabled={snapshot.length === 0 || applying || resetting}>
+				{$t("photo_wall.reset")}
+			</button>
+			<button class="primary-button" on:click={() => void apply()} disabled={!image || !profile || applying || resetting}>
+				{$t("photo_wall.applyDeck")}
 			</button>
 		</div>
 	</svelte:fragment>
