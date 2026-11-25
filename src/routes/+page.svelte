@@ -64,7 +64,7 @@
 		<nav class="flex flex-col gap-1 p-2" aria-label={$t("settings.button")}>
 			<div class="side-row side-row-active" aria-current="page">
 				<SquaresFour size={20} />
-				<span>{$t("device_selector.device")}</span>
+				<span>{$t("nav.devices")}</span>
 			</div>
 			<div class="side-row">
 				<Plug size={20} />

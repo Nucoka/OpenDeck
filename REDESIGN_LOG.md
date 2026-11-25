@@ -84,3 +84,7 @@ Done: added a `--accent` alias for the accent token and a global `accent-color` 
 ## Visual-fix 5 - plugin card action button
 
 Done: builtin plugins no longer render an empty primary button next to Auto-restart (`actionVisible` prop from the existing `builtin` / developer-mode data). The remaining delete/uninstall button now has both `aria-label` and `title` from the existing action label. Not verified in GUI.
+
+## Visual-fix 6 - Settings sections
+
+Done: settings are grouped into Display, Behavior, System and Config sections with headings and new `settings.section.*` keys. The original project's star/sponsor footer and its imports were removed. Sidebar label now uses `nav.devices` = "Devices". Bindings and invoked commands unchanged. Not verified in GUI.
