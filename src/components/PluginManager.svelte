@@ -35,6 +35,7 @@
 	};
 
 	let showPopup: boolean;
+	export let inline: boolean = false;
 	let statuses: { [id: string]: PluginStatus } = {};
 	let unlistenStatus: (() => void) | undefined;
 
@@ -287,9 +288,11 @@
 	});
 </script>
 
-<button class="side-control" on:click={() => (showPopup = true)}>
-	{$t("plugin_manager.button")}
-</button>
+{#if !inline}
+	<button class="side-control" on:click={() => (showPopup = true)}>
+		{$t("plugin_manager.button")}
+	</button>
+{/if}
 
 <svelte:window
 	on:keydown={(event) => {
@@ -301,7 +304,7 @@
 	}}
 />
 
-<Popup show={showPopup} label={$t("plugin_manager.title")}>
+<Popup show={inline || showPopup} {inline} label={$t("plugin_manager.title")}>
 	<svelte:fragment slot="header">
 		<button class="mr-2 my-1 float-right text-xl text-app-text" on:click={() => (showPopup = false)} aria-label={$t("settings.close")}>✕</button>
 		<h2 class="m-2 font-semibold text-xl text-app-text">{$t("plugin_manager.title")}</h2>

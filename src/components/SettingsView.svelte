@@ -15,6 +15,7 @@
 	import { message } from "@tauri-apps/plugin-dialog";
 
 	let showPopup: boolean;
+	export let inline: boolean = false;
 	let buildInfo: string;
 	(async () => (buildInfo = await invoke("get_build_info")))();
 
@@ -48,9 +49,11 @@
 	}
 </script>
 
-<button class="side-control" on:click={() => (showPopup = true)}>
-	{$t("settings.button")}
-</button>
+{#if !inline}
+	<button class="side-control" on:click={() => (showPopup = true)}>
+		{$t("settings.button")}
+	</button>
+{/if}
 
 <svelte:window
 	on:keydown={(event) => {
@@ -58,7 +61,7 @@
 	}}
 />
 
-<Popup show={showPopup} label={$t("settings.button")}>
+<Popup show={inline || showPopup} {inline} label={$t("settings.button")}>
 	<svelte:fragment slot="header">
 		<button class="mr-2 my-1 float-right text-xl text-app-text" on:click={() => (showPopup = false)} aria-label={$t("settings.close")}>✕</button>
 		<h2 class="m-2 font-semibold text-xl text-app-text">{$t("settings.button")}</h2>

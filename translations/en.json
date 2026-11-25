@@ -1,4 +1,5 @@
 {
+	"action_list.button": "Actions",
 	"action_list.hint": "Use arrow keys to navigate between actions within a category.",
 	"action_list.search_placeholder": "Search actions",
 	"action_list.toggle": "Toggle action library",
@@ -30,6 +31,7 @@
 	"instance_editor.state": "State",
 	"instance_editor.state.n": "State {{n}}",
 	"inspector.action": "Action",
+	"inspector.key": "Key",
 	"inspector.appearance": "Appearance",
 	"inspector.empty": "Select a button to edit its appearance or action.",
 	"instance_editor.stroke": "Stroke",
@@ -190,5 +192,17 @@
 	"settings.sleep_when_computer_locked": "Sleep when computer is locked:",
 	"settings.sleep_when_computer_locked.tooltip": "If this option is enabled, devices will enter sleep mode when the computer locks and all key presses will be suppressed until it is unlocked.",
 	"settings.statistics": "Contribute statistics:",
-	"settings.updatecheck": "Check for updates:"
+	"settings.updatecheck": "Check for updates:",
+	"v2.devices.subtitle": "Control your stream controller",
+	"v2.devices.title": "Devices",
+	"v2.photoWall.noDevice": "Connect a device to create a photo wall.",
+	"v2.photoWall.subtitle": "Spread one image across all keys",
+	"v2.photoWall.title": "Photo wall",
+	"v2.plugins.subtitle": "Installed plugins and the plugin store",
+	"v2.plugins.title": "Plugins",
+	"v2.profile.placeholder": "Profile management",
+	"v2.profile.subtitle": "Switch and manage profiles",
+	"v2.profile.title": "Profile",
+	"v2.settings.subtitle": "Configure OpenDeck",
+	"v2.settings.title": "Settings"
 }

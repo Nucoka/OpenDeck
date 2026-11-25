@@ -28,6 +28,7 @@
 	export let device: DeviceInfo;
 	export let profile: Profile;
 	export let show = false;
+	export let inline: boolean = false;
 
 	type RenderParams = {
 		image: HTMLImageElement | undefined;
@@ -282,7 +283,7 @@
 	}}
 />
 
-<Popup {show} label={$t("photo_wall.title")}>
+<Popup show={inline || show} {inline} label={$t("photo_wall.title")}>
 	<svelte:fragment slot="header">
 		<button class="mr-2 my-1 float-right text-xl text-app-text" on:click={() => (show = false)} aria-label={$t("photo_wall.close")}>✕</button>
 		<h2 class="m-2 font-semibold text-xl text-app-text">{$t("photo_wall.title")}</h2>

@@ -3,11 +3,11 @@
 	import type { DeviceInfo } from "$lib/DeviceInfo";
 	import type { Profile } from "$lib/Profile";
 
+	import { applyAppearance, loadAppearance } from "$lib/appearance";
 	import { t } from "$lib/i18n";
 	import { initPortBase } from "$lib/ports";
 	import { inspectedInstance, inspectedParentAction } from "$lib/propertyInspector";
-	import { settings } from "$lib/settings";
-	import { actionList, deviceSelector, profileManager } from "$lib/singletons";
+	import { actionList, deviceSelector } from "$lib/singletons";
 
 	import Diamond from "phosphor-svelte/lib/Diamond";
 	import Gear from "phosphor-svelte/lib/Gear";
@@ -25,17 +25,20 @@
 	import ParentActionView from "../components/ParentActionView.svelte";
 	import PhotoWall from "../components/PhotoWall.svelte";
 	import PluginManager from "../components/PluginManager.svelte";
-	import ProfileManager from "../components/ProfileManager.svelte";
 	import PropertyInspectorView from "../components/PropertyInspectorView.svelte";
 	import SettingsView from "../components/SettingsView.svelte";
 
 	let devices: { [id: string]: DeviceInfo } = {};
 	let selectedDevice: string;
 	let selectedProfiles: { [id: string]: Profile } = {};
-	let showPhotoWall = false;
+	type Page = "devices" | "plugins" | "photo-wall" | "settings" | "profile";
+	let currentPage: Page = "devices";
 	let inspectorTab: "appearance" | "action" = "appearance";
 	let actionsCollapsed = typeof window !== "undefined" && window.innerWidth < 1400;
 
+	applyAppearance(loadAppearance());
+
+	$: pageKey = currentPage === "photo-wall" ? "photoWall" : currentPage;
 	$: selectedInstance = ((): ActionInstance | null => {
 		const context = typeof $inspectedInstance === "string" ? $inspectedInstance : null;
 		const profile = selectedProfiles[selectedDevice];
@@ -57,134 +60,145 @@
 <svelte:window on:dragover={(event) => event.preventDefault()} on:drop={(event) => event.preventDefault()} />
 
 <div class="flex h-screen flex-row bg-app-bg text-app-text">
-	<aside class="app-sidebar flex shrink-0 flex-col border-r border-app-border bg-app-panel" class:hidden={$inspectedParentAction}>
+	<aside
+		class="app-sidebar glass flex shrink-0 flex-col border-r border-app-border bg-app-panel"
+		class:compact={currentPage === "devices" && !actionsCollapsed}
+		class:hidden={$inspectedParentAction}
+	>
 		<div class="flex h-14 items-center gap-2 border-b border-app-border px-4">
 			<Diamond size={18} weight="fill" class="shrink-0 text-app-accent" />
 			<span class="brand-label text-sm font-semibold tracking-wide">OpenDeck</span>
 		</div>
 
-		<nav class="flex flex-col gap-1 p-2" aria-label={$t("settings.button")}>
-			<div class="side-row side-row-active" aria-current="page">
+		<nav class="flex flex-col gap-1 p-2" aria-label={$t("nav.devices")}>
+			<button class="side-row" class:side-row-active={currentPage === "devices"} on:click={() => (currentPage = "devices")}>
 				<SquaresFour size={20} />
 				<span>{$t("nav.devices")}</span>
-			</div>
-			<div class="side-row">
+			</button>
+			<button class="side-row" class:side-row-active={currentPage === "plugins"} on:click={() => (currentPage = "plugins")}>
 				<Plug size={20} />
-				<PluginManager />
-			</div>
-			<div class="side-row">
+				<span>{$t("plugin_manager.button")}</span>
+			</button>
+			<button class="side-row" class:side-row-active={currentPage === "photo-wall"} on:click={() => (currentPage = "photo-wall")}>
+				<ImageSquare size={20} />
+				<span>{$t("photo_wall.button")}</span>
+			</button>
+			<button class="side-row" class:side-row-active={currentPage === "settings"} on:click={() => (currentPage = "settings")}>
+				<Gear size={20} />
+				<span>{$t("settings.button")}</span>
+			</button>
+			<button class="side-row" class:side-row-active={currentPage === "profile"} on:click={() => (currentPage = "profile")}>
 				<UserCircle size={20} />
 				<span>{$t("profile_manager.label")}</span>
-			</div>
-			<div class="side-row">
-				<Gear size={20} />
-				<SettingsView />
-			</div>
+			</button>
 		</nav>
 	</aside>
 
 	<div class="flex min-w-0 grow flex-col">
-		<header class="grid h-14 shrink-0 grid-cols-3 items-center gap-2 border-b border-app-border bg-app-bg px-6" class:hidden={$inspectedParentAction}>
-			<div class="flex min-w-0 items-center gap-2 overflow-hidden">
-				{#key selectedDevice}
-					{#if selectedDevice && devices[selectedDevice]}
-						<ProfileManager bind:device={devices[selectedDevice]} bind:profile={selectedProfiles[selectedDevice]} bind:this={$profileManager} />
-					{/if}
-				{/key}
+		<header class="flex h-16 shrink-0 items-center justify-between gap-4 border-b border-app-border px-6" class:hidden={$inspectedParentAction}>
+			<div class="min-w-0">
+				<h1 class="font-display truncate text-2xl font-semibold">{$t(`v2.${pageKey}.title`)}</h1>
+				<p class="truncate text-xs text-app-muted">{$t(`v2.${pageKey}.subtitle`)}</p>
 			</div>
 
-			<div class="device-chip flex min-w-[120px] max-w-[220px] items-center justify-center gap-2">
-				<span
-					class="size-2 shrink-0 rounded-full"
-					class:bg-app-success={Boolean(selectedDevice && devices[selectedDevice])}
-					class:bg-app-danger={!selectedDevice || !devices[selectedDevice]}
-					aria-hidden="true"
-				/>
-				<DeviceSelector bind:devices bind:value={selectedDevice} bind:selectedProfiles bind:this={$deviceSelector} />
-			</div>
-
-			<div class="flex min-w-0 items-center justify-end gap-2 overflow-hidden">
-				{#if $settings}
-					<label class="flex min-w-0 items-center gap-2 text-xs text-app-muted" for="header-brightness">
-						{$t("settings.brightness")}
-						<input id="header-brightness" type="range" min="0" max="100" bind:value={$settings.brightness} class="w-20 shrink-0 accent-app-accent xl:w-28" />
-					</label>
-				{/if}
-				{#if selectedDevice && devices[selectedDevice] && selectedProfiles[selectedDevice]}
-					<button class="header-button" on:click={() => (showPhotoWall = true)}>
-						<ImageSquare size={16} />
-						{$t("photo_wall.button")}
+			<div class="flex shrink-0 items-center gap-3">
+				<div class="device-chip flex min-w-[120px] max-w-[220px] items-center justify-center gap-2">
+					<span
+						class="size-2 shrink-0 rounded-full"
+						class:bg-app-success={Boolean(selectedDevice && devices[selectedDevice])}
+						class:bg-app-danger={!selectedDevice || !devices[selectedDevice]}
+						aria-hidden="true"
+					/>
+					<DeviceSelector bind:devices bind:value={selectedDevice} bind:selectedProfiles bind:this={$deviceSelector} />
+				</div>
+				{#if currentPage === "devices"}
+					<button class="primary-button" on:click={() => (actionsCollapsed = !actionsCollapsed)}>
+						+ {$t("action_list.button")}
 					</button>
-					<PhotoWall bind:show={showPhotoWall} bind:profile={selectedProfiles[selectedDevice]} device={devices[selectedDevice]} />
 				{/if}
 			</div>
 		</header>
 
-		<main class="relative flex min-h-0 grow">
-			<aside class="action-rail flex shrink-0 flex-col overflow-hidden border-r border-app-border bg-app-panel" class:collapsed={actionsCollapsed}>
-				<button
-					class="flex h-10 shrink-0 items-center justify-center border-b border-app-border text-app-muted hover:text-app-accent"
-					on:click={() => (actionsCollapsed = !actionsCollapsed)}
-					aria-label={$t("action_list.toggle")}
-					title={$t("action_list.toggle")}
-				>
-					<List size={18} />
-				</button>
-				<div class="min-w-0 flex-1" class:hidden={actionsCollapsed}>
-					<ActionList bind:this={$actionList} />
-				</div>
-			</aside>
+		<main class="page-area relative min-h-0 grow overflow-auto p-5">
+			{#if currentPage === "devices"}
+				<div class="flex h-full min-h-0 gap-4">
+					<aside
+						class="action-rail flex shrink-0 flex-col overflow-hidden rounded-[20px] border border-app-border bg-app-card"
+						class:collapsed={actionsCollapsed}
+					>
+						<button
+							class="flex h-10 shrink-0 items-center justify-center border-b border-app-border text-app-muted hover:text-app-accent"
+							on:click={() => (actionsCollapsed = !actionsCollapsed)}
+							aria-label={$t("action_list.toggle")}
+							title={$t("action_list.toggle")}
+						>
+							<List size={18} />
+						</button>
+						<div class="min-w-0 flex-1" class:hidden={actionsCollapsed}>
+							<ActionList bind:this={$actionList} />
+						</div>
+					</aside>
 
-			<div class="flex min-w-0 grow flex-col">
-				{#if Object.keys(devices).length > 0 && selectedProfiles}
-					{#if $inspectedParentAction}
-						<ParentActionView bind:profile={selectedProfiles[selectedDevice]} />
-					{/if}
+					<div class="flex min-w-0 grow flex-col">
+						{#if Object.keys(devices).length > 0 && selectedProfiles}
+							{#if $inspectedParentAction}
+								<ParentActionView bind:profile={selectedProfiles[selectedDevice]} />
+							{/if}
 
-					{#each Object.entries(devices) as [id, device]}
-						{#if device && selectedProfiles[id]}
-							<DeviceView bind:device bind:profile={selectedProfiles[id]} bind:selectedDevice />
+							{#each Object.entries(devices) as [id, device]}
+								{#if device && selectedProfiles[id]}
+									<DeviceView bind:device bind:profile={selectedProfiles[id]} bind:selectedDevice />
+								{/if}
+							{/each}
+						{:else}
+							<NoDevicesDetected />
 						{/if}
-					{/each}
-				{:else}
-					<NoDevicesDetected />
-				{/if}
-			</div>
+					</div>
 
-			<aside class="inspector-panel flex shrink-0 flex-col border-l border-app-border bg-app-panel">
-				<div class="flex h-10 shrink-0 items-center gap-1 border-b border-app-border px-3">
-					<button
-						class="rounded-lg px-3 py-1 text-xs text-app-muted hover:text-app-text"
-						class:bg-app-accent-soft={inspectorTab === "appearance"}
-						class:text-app-accent={inspectorTab === "appearance"}
-						on:click={() => (inspectorTab = "appearance")}
-					>
-						{$t("inspector.appearance")}
-					</button>
-					<button
-						class="rounded-lg px-3 py-1 text-xs text-app-muted hover:text-app-text"
-						class:bg-app-accent-soft={inspectorTab === "action"}
-						class:text-app-accent={inspectorTab === "action"}
-						on:click={() => (inspectorTab = "action")}
-					>
-						{$t("inspector.action")}
-					</button>
+					<aside class="inspector-panel flex shrink-0 flex-col rounded-[20px] border border-app-border bg-app-card">
+						<div class="flex h-10 shrink-0 items-center gap-1 border-b border-app-border px-3">
+							<button class="tab-button" class:tab-active={inspectorTab === "appearance"} on:click={() => (inspectorTab = "appearance")}>
+								{$t("inspector.key")}
+							</button>
+							<button class="tab-button" class:tab-active={inspectorTab === "action"} on:click={() => (inspectorTab = "action")}>
+								{$t("inspector.action")}
+							</button>
+						</div>
+
+						{#if selectedProfiles[selectedDevice]}
+							<div class="min-h-0 grow overflow-auto p-3" class:hidden={!selectedInstance || inspectorTab !== "action"}>
+								<PropertyInspectorView bind:device={devices[selectedDevice]} bind:profile={selectedProfiles[selectedDevice]} />
+							</div>
+						{/if}
+
+						{#if selectedInstance && inspectorTab === "appearance"}
+							<div class="min-h-0 grow overflow-auto p-3">
+								<InstanceEditor instance={selectedInstance} showEditor={true} inline />
+							</div>
+						{:else if !selectedInstance}
+							<div class="empty-state">{$t("inspector.empty")}</div>
+						{/if}
+					</aside>
 				</div>
-
-				{#if selectedProfiles[selectedDevice]}
-					<div class="min-h-0 grow overflow-auto p-3" class:hidden={!selectedInstance || inspectorTab !== "action"}>
-						<PropertyInspectorView bind:device={devices[selectedDevice]} bind:profile={selectedProfiles[selectedDevice]} />
+			{:else if currentPage === "plugins"}
+				<div class="page-panel h-full">
+					<PluginManager inline />
+				</div>
+			{:else if currentPage === "photo-wall"}
+				{#if selectedDevice && devices[selectedDevice] && selectedProfiles[selectedDevice]}
+					<div class="page-panel h-full">
+						<PhotoWall inline show={true} profile={selectedProfiles[selectedDevice]} device={devices[selectedDevice]} />
 					</div>
+				{:else}
+					<div class="empty-state">{$t("v2.photoWall.noDevice")}</div>
 				{/if}
-
-				{#if selectedInstance && inspectorTab === "appearance"}
-					<div class="min-h-0 grow overflow-auto p-3">
-						<InstanceEditor instance={selectedInstance} showEditor={true} inline />
-					</div>
-				{:else if !selectedInstance}
-					<div class="empty-state">{$t("inspector.empty")}</div>
-				{/if}
-			</aside>
+			{:else if currentPage === "settings"}
+				<div class="page-panel h-full">
+					<SettingsView inline />
+				</div>
+			{:else}
+				<div class="empty-state">{$t("v2.profile.placeholder")}</div>
+			{/if}
 		</main>
 	</div>
 </div>

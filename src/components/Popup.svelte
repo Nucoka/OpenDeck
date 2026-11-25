@@ -3,11 +3,12 @@
 
 	export let show = false;
 	export let label = "";
+	export let inline = false;
 
 	let popupEl: HTMLDivElement;
 	let previousFocus: HTMLElement | null = null;
 
-	$: if (show) {
+	$: if (show && !inline) {
 		previousFocus = document.activeElement as HTMLElement | null;
 		tick().then(() => popupEl?.focus());
 	} else if (previousFocus) {
@@ -18,15 +19,17 @@
 	onDestroy(() => previousFocus?.focus());
 </script>
 
-{#if show}
+{#if inline || show}
+	<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
 	<div
 		bind:this={popupEl}
-		class="absolute top-0 left-0 m-2 p-4 w-[calc(100%-1rem)] h-[calc(100%-1rem)] bg-app-panel border border-app-border rounded-xl z-30"
-		class:flex={$$slots.header || $$slots.footer}
-		class:flex-col={$$slots.header || $$slots.footer}
-		class:overflow-auto={!$$slots.header && !$$slots.footer}
-		role="dialog"
-		tabindex="-1"
+		class={inline
+			? "glass flex h-full min-h-0 w-full flex-col overflow-hidden rounded-[20px] border border-app-border bg-app-card/90"
+			: "glass absolute left-0 top-0 m-2 h-[calc(100%-1rem)] w-[calc(100%-1rem)] overflow-auto rounded-[20px] border border-app-border bg-app-card/90 p-4 z-30"}
+		class:flex={!inline && ($$slots.header || $$slots.footer)}
+		class:flex-col={!inline && ($$slots.header || $$slots.footer)}
+		role={inline ? "region" : "dialog"}
+		tabindex={inline ? undefined : -1}
 		aria-label={label}
 	>
 		{#if $$slots.header}
@@ -34,7 +37,7 @@
 				<slot name="header" />
 			</div>
 		{/if}
-		<div class="flex-1" class:overflow-auto={$$slots.header || $$slots.footer}>
+		<div class="min-h-0 flex-1" class:overflow-auto={$$slots.header || $$slots.footer}>
 			<slot />
 		</div>
 		{#if $$slots.footer}
