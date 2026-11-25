@@ -80,3 +80,7 @@ Done: `Columns with screens` is stored in `localStorage` under `opendeck.photoWa
 ## Visual-fix 4 - form accent colour
 
 Done: added a `--accent` alias for the accent token and a global `accent-color` rule for range, checkbox and radio inputs, replacing the browser's blue default. Not verified in GUI.
+
+## Visual-fix 5 - plugin card action button
+
+Done: builtin plugins no longer render an empty primary button next to Auto-restart (`actionVisible` prop from the existing `builtin` / developer-mode data). The remaining delete/uninstall button now has both `aria-label` and `title` from the existing action label. Not verified in GUI.

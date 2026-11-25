@@ -353,6 +353,7 @@
 				secondaryActionLabel={!plugin.registered ? $t("plugin_manager.view_logs") : $t("plugin_manager.plugin_settings")}
 				status={statuses[plugin.id]?.status ?? plugin.status ?? "running"}
 				exitCode={statuses[plugin.id]?.exit_code ?? null}
+				actionVisible={$settings?.developer || !plugin.builtin}
 			>
 				<svelte:fragment slot="subtitle">
 					<span class="font-mono">{plugin.version}</span>

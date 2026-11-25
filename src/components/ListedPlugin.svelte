@@ -13,6 +13,7 @@
 	export let status: string = "running";
 	export let exitCode: number | null = null;
 	export let description: string = "";
+	export let actionVisible: boolean = true;
 </script>
 
 <div class="m-2 flex flex-col rounded-xl border border-app-border bg-app-panel p-3 hover:border-app-accent" class:hidden>
@@ -52,12 +53,15 @@
 				<slot name="secondary" />
 			</button>
 		{/if}
-		<button
-			class="flex flex-row items-center gap-1 rounded-lg border border-app-border bg-app-elevated px-2 py-1 text-xs text-app-text hover:text-app-accent"
-			on:click={action}
-			aria-label={actionLabel}
-		>
-			<slot />
-		</button>
+		{#if actionVisible}
+			<button
+				class="flex flex-row items-center gap-1 rounded-lg border border-app-border bg-app-elevated px-2 py-1 text-xs text-app-text hover:text-app-accent"
+				on:click={action}
+				aria-label={actionLabel}
+				title={actionLabel}
+			>
+				<slot />
+			</button>
+		{/if}
 	</div>
 </div>
