@@ -14,9 +14,10 @@
 	export let exitCode: number | null = null;
 	export let description: string = "";
 	export let actionVisible: boolean = true;
+	export let compact: boolean = false;
 </script>
 
-<div class="m-2 flex flex-col rounded-xl border border-app-border bg-app-panel p-3 hover:border-app-accent" class:hidden>
+<div class="m-2 flex flex-col rounded-[18px] border border-app-border bg-app-card p-3 hover:border-app-accent" class:hidden class:compact-row={compact}>
 	<div class="flex items-start gap-3">
 		<img src={icon} class="size-12 rounded-lg" class:opacity-75={disconnected} alt={name} loading="lazy" />
 		<div class="min-w-0 flex-1">
@@ -67,3 +68,29 @@
 		{/if}
 	</div>
 </div>
+
+<style>
+	.compact-row {
+		flex-direction: row;
+		align-items: center;
+		gap: 12px;
+	}
+
+	.compact-row > div:first-child {
+		flex: 1 1 auto;
+	}
+
+	.compact-row img {
+		width: 36px;
+		height: 36px;
+		border-radius: 10px;
+	}
+
+	.compact-row > div:last-child {
+		flex-direction: row;
+		align-items: center;
+		margin-top: 0;
+		border-top: 0;
+		padding-top: 0;
+	}
+</style>

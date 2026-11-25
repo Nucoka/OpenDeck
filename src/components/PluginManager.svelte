@@ -36,6 +36,7 @@
 
 	let showPopup: boolean;
 	export let inline: boolean = false;
+	let pluginTab: "installed" | "store" = "installed";
 	let statuses: { [id: string]: PluginStatus } = {};
 	let unlistenStatus: (() => void) | undefined;
 
@@ -264,19 +265,10 @@
 
 	let query: string = "";
 
-	type PluginFilter = "all" | "installed" | "running" | "crashed";
-	const filters: PluginFilter[] = ["all", "installed", "running", "crashed"];
-	let pluginFilter: PluginFilter = "all";
-
 	$: filteredInstalled = installed
 		.filter((plugin) => {
 			const lower = query.toLowerCase().trim();
-			if (lower && !`${plugin.name} ${plugin.id}`.toLowerCase().includes(lower)) return false;
-			const status = statuses[plugin.id]?.status ?? plugin.status ?? "running";
-			if (pluginFilter === "installed") return !plugin.builtin;
-			if (pluginFilter === "running") return status === "running";
-			if (pluginFilter === "crashed") return status === "crashed" || status === "failed";
-			return true;
+			return !lower || `${plugin.name} ${plugin.id}`.toLowerCase().includes(lower);
 		})
 		.sort((a, b) => (a.builtin && !b.builtin ? -1 : b.builtin && !a.builtin ? 1 : a.id.localeCompare(b.id)));
 
@@ -306,215 +298,216 @@
 
 <Popup show={inline || showPopup} {inline} label={$t("plugin_manager.title")}>
 	<svelte:fragment slot="header">
-		<button class="mr-2 my-1 float-right text-xl text-app-text" on:click={() => (showPopup = false)} aria-label={$t("settings.close")}>✕</button>
-		<h2 class="m-2 font-semibold text-xl text-app-text">{$t("plugin_manager.title")}</h2>
+		{#if !inline}
+			<button class="mr-2 my-1 float-right text-xl text-app-text" on:click={() => (showPopup = false)} aria-label={$t("settings.close")}>✕</button>
+		{/if}
+		<div class="flex flex-row flex-wrap items-center gap-2">
+			<button class="tab-button" class:tab-active={pluginTab === "installed"} on:click={() => (pluginTab = "installed")}>
+				{$t("plugin_manager.installed")}
+			</button>
+			<button class="tab-button" class:tab-active={pluginTab === "store"} on:click={() => (pluginTab = "store")}>
+				{$t("plugin_manager.store")}
+			</button>
+		</div>
+		<div class="mt-3 flex flex-row items-center gap-2">
+			<div class="flex flex-1 flex-row items-center rounded-xl border border-app-border bg-app-elevated px-3">
+				<MagnifyingGlass size={16} class="text-app-muted" />
+				<input
+					bind:value={query}
+					class="w-full bg-transparent p-2 text-xs text-app-text placeholder:text-app-muted"
+					placeholder={$t("plugin_manager.search")}
+					aria-label={$t("plugin_manager.search")}
+					type="search"
+					spellcheck="false"
+				/>
+			</div>
+			<button class="secondary-button" on:click={installPluginFile}>
+				<FileArrowUp size={16} />
+				{$t("plugin_manager.install_from_file")}
+			</button>
+		</div>
 	</svelte:fragment>
 
-	<h2 class="mx-2 mb-2 mt-4 text-lg text-app-muted">{$t("plugin_manager.installed")}</h2>
-	<div class="mx-2 mb-3 flex flex-row items-center gap-2 rounded-lg border border-app-border bg-app-panel px-2 py-2">
-		<MagnifyingGlass size={16} class="text-app-muted" />
-		<input
-			bind:value={query}
-			class="w-full bg-transparent p-1 text-sm text-app-text placeholder:text-app-muted"
-			placeholder={$t("plugin_manager.search")}
-			aria-label={$t("plugin_manager.search")}
-			type="search"
-			spellcheck="false"
-		/>
-	</div>
-	<div class="mx-2 mb-3 flex flex-row flex-wrap gap-2">
-		{#each filters as filter}
-			<button
-				class="rounded-full border border-app-border bg-app-elevated px-3 py-1 text-xs text-app-muted transition-colors"
-				class:border-app-accent={pluginFilter === filter}
-				class:text-app-accent={pluginFilter === filter}
-				on:click={() => (pluginFilter = filter)}
-				aria-pressed={pluginFilter === filter}
-			>
-				{$t(`plugin_manager.filter.${filter}`)}
-			</button>
-		{/each}
-	</div>
-	<div class="grid grid-cols-1 gap-1 md:grid-cols-2 lg:grid-cols-3">
-		{#each filteredInstalled as plugin}
-			<ListedPlugin
-				icon={getWebserverUrl(plugin.icon)}
-				name={$localisations && $localisations[plugin.id] && $localisations[plugin.id].Name ? $localisations[plugin.id].Name : plugin.name}
-				subtitle={plugin.version}
-				description={$localisations?.[plugin.id]?.Tooltip ?? ""}
-				disconnected={!plugin.registered}
-				action={() => {
-					if ($settings?.developer) invoke("reload_plugin", { id: plugin.id });
-					else removePlugin(plugin);
-				}}
-				actionLabel={$settings?.developer ? $t("plugin_manager.reload") : $t("plugin_manager.uninstall")}
-				secondaryAction={!plugin.registered
-					? () => invoke("open_log_directory")
-					: plugin.has_settings_interface
-						? () => invoke("show_settings_interface", { plugin: plugin.id })
-						: undefined}
-				secondaryActionLabel={!plugin.registered ? $t("plugin_manager.view_logs") : $t("plugin_manager.plugin_settings")}
-				status={statuses[plugin.id]?.status ?? plugin.status ?? "running"}
-				exitCode={statuses[plugin.id]?.exit_code ?? null}
-				actionVisible={$settings?.developer || !plugin.builtin}
-			>
-				<svelte:fragment slot="subtitle">
-					<span class="font-mono">{plugin.version}</span>
-					{#if plugin.author}<span class="text-app-muted"> · {plugin.author}</span>{/if}
-					{#if availableUpdates[plugin.id]}
-						(<span class="text-app-warning">
-							{$t("plugin_manager.available")}
-							<button class="font-semibold underline" on:click={() => (openDetailsView = plugin.id.endsWith(".sdPlugin") ? plugin.id.slice(0, -9) : plugin.id)}>
-								{availableUpdates[plugin.id]}
-							</button></span
-						>)
-					{/if}
-				</svelte:fragment>
-
-				<svelte:fragment slot="secondary">
-					{#if !plugin.registered}
-						<WarningCircle size={16} class="text-app-warning" />
-					{:else if plugin.has_settings_interface}
-						<Gear size={16} class="text-app-success" />
-					{/if}
-				</svelte:fragment>
-
-				<svelte:fragment slot="controls">
-					<button
-						class="flex flex-row items-center justify-center gap-1 rounded-lg border border-app-border bg-app-elevated px-2 py-1 text-xs text-app-text hover:text-app-accent"
-						on:click={() => void restartPlugin(plugin.id)}
-						aria-label={$t("plugin_manager.restart")}
-						title={$t("plugin_manager.restart")}
-					>
-						<ArrowClockwise size={14} />
-						{$t("plugin_manager.restart")}
-					</button>
-					<label class="flex flex-row items-center space-x-1 text-xs text-app-muted" title={$t("plugin_manager.auto_restart")}>
-						<input type="checkbox" checked={plugin.auto_restart} on:change={(event) => void setAutoRestart(plugin.id, event.currentTarget.checked)} />
-						{$t("plugin_manager.auto_restart")}
-					</label>
-				</svelte:fragment>
-
-				{#if $settings?.developer}
-					<ArrowClockwise size={16} class="text-app-muted" />
-				{:else if !plugin.builtin}
-					<Trash size={16} class="text-app-danger" />
-				{/if}
-			</ListedPlugin>
-		{/each}
-	</div>
-
-	<div class="flex flex-row justify-between items-center mx-2 mt-6 mb-2">
-		<h2 class="text-lg text-app-muted">{$t("plugin_manager.store")}</h2>
-		<button
-			class="flex flex-row items-center mt-2 px-1 py-0.5 text-sm text-app-text bg-app-panel hover:bg-app-border transition-colors border border-app-border rounded-lg"
-			on:click={installPluginFile}
-		>
-			<FileArrowUp />
-			<span class="ml-1">{$t("plugin_manager.install_from_file")}</span>
-		</button>
-	</div>
-
-	<div class="flex flex-row items-center mx-2 my-4 p-3 space-x-2 bg-app-warning/10 border-l-4 border-app-warning rounded">
-		<WarningCircle size="20" class="mt-0.5 text-app-warning" />
-		<div class="text-sm text-app-warning-soft">
-			{$t("plugin_manager.warning", { PRODUCT_NAME })}
-		</div>
-	</div>
-
-	{#if !plugins}
-		<h2 class="mx-2 mt-6 mb-2 text-md text-app-muted">{$t("plugin_manager.loading.open_source")}</h2>
-	{:else}
-		<div class="flex flex-row items-center ml-2 mt-6 mb-2 space-x-2">
-			<h2 class="font-semibold text-md text-app-muted">{$t("plugin_manager.open_source")}</h2>
-			<Tooltip>{$t("plugin_manager.open_source.tooltip")}</Tooltip>
-		</div>
-		<div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-			{#each Object.entries(plugins) as [id, plugin]}
+	{#if pluginTab === "installed"}
+		<div class="flex flex-col">
+			{#each filteredInstalled as plugin}
 				<ListedPlugin
-					icon="https://openactionapi.github.io/plugins/icons/{id}.png"
-					name={plugin.name}
-					subtitle={plugin.author}
-					hidden={!plugin.name.toLowerCase().includes(query.toLowerCase())}
-					action={() => (openDetailsView = id)}
-					actionLabel={$t("plugin_manager.view_details")}
+					icon={getWebserverUrl(plugin.icon)}
+					name={$localisations && $localisations[plugin.id] && $localisations[plugin.id].Name ? $localisations[plugin.id].Name : plugin.name}
+					subtitle={plugin.version}
+					description={$localisations?.[plugin.id]?.Tooltip ?? ""}
+					disconnected={!plugin.registered}
+					action={() => {
+						if ($settings?.developer) invoke("reload_plugin", { id: plugin.id });
+						else removePlugin(plugin);
+					}}
+					actionLabel={$settings?.developer ? $t("plugin_manager.reload") : $t("plugin_manager.uninstall")}
+					secondaryAction={!plugin.registered
+						? () => invoke("open_log_directory")
+						: plugin.has_settings_interface
+							? () => invoke("show_settings_interface", { plugin: plugin.id })
+							: undefined}
+					secondaryActionLabel={!plugin.registered ? $t("plugin_manager.view_logs") : $t("plugin_manager.plugin_settings")}
+					status={statuses[plugin.id]?.status ?? plugin.status ?? "running"}
+					exitCode={statuses[plugin.id]?.exit_code ?? null}
+					actionVisible={$settings?.developer || !plugin.builtin}
+					compact
 				>
 					<svelte:fragment slot="subtitle">
-						<span>
-							{plugin.author}
-							{#if plugin.flags?.ai_assisted}
-								<Robot size="1em" class="inline align-text-bottom text-app-warning" />
-							{/if}
-						</span>
+						<span class="font-mono">{plugin.version}</span>
+						{#if plugin.author}<span class="text-app-muted"> · {plugin.author}</span>{/if}
+						{#if availableUpdates[plugin.id]}
+							(<span class="text-app-warning">
+								{$t("plugin_manager.available")}
+								<button
+									class="font-semibold underline"
+									on:click={() => (openDetailsView = plugin.id.endsWith(".sdPlugin") ? plugin.id.slice(0, -9) : plugin.id)}
+								>
+									{availableUpdates[plugin.id]}
+								</button></span
+							>)
+						{/if}
 					</svelte:fragment>
 
-					<ArrowSquareOut size="24" class="text-app-muted" />
+					<svelte:fragment slot="secondary">
+						{#if !plugin.registered}
+							<WarningCircle size={16} class="text-app-warning" />
+						{:else if plugin.has_settings_interface}
+							<Gear size={16} class="text-app-success" />
+						{/if}
+					</svelte:fragment>
+
+					<svelte:fragment slot="controls">
+						<button
+							class="flex flex-row items-center justify-center gap-1 rounded-lg border border-app-border bg-app-elevated px-2 py-1 text-xs text-app-text hover:text-app-accent"
+							on:click={() => void restartPlugin(plugin.id)}
+							aria-label={$t("plugin_manager.restart")}
+							title={$t("plugin_manager.restart")}
+						>
+							<ArrowClockwise size={14} />
+							{$t("plugin_manager.restart")}
+						</button>
+						<label class="flex flex-row items-center space-x-1 text-xs text-app-muted" title={$t("plugin_manager.auto_restart")}>
+							<input type="checkbox" checked={plugin.auto_restart} on:change={(event) => void setAutoRestart(plugin.id, event.currentTarget.checked)} />
+							{$t("plugin_manager.auto_restart")}
+						</label>
+					</svelte:fragment>
+
+					{#if $settings?.developer}
+						<ArrowClockwise size={16} class="text-app-muted" />
+					{:else if !plugin.builtin}
+						<Trash size={16} class="text-app-danger" />
+					{/if}
 				</ListedPlugin>
 			{/each}
 		</div>
-	{/if}
-
-	<div class="flex flex-row items-center mt-6 mb-2">
-		<h2 class="mx-2 font-semibold text-md text-app-muted">{$t("plugin_manager.elgato")}</h2>
-		<Tooltip>{$t("plugin_manager.elgato.tooltip")}</Tooltip>
-	</div>
-	{#if !showArchive}
-		<button
-			class="ml-2 mt-2 mb-2 px-2 py-1 text-sm text-app-text bg-app-panel hover:bg-app-border transition-colors border border-app-border rounded-lg"
-			on:click={async () => {
-				showArchive = true;
-				archivePlugins = await (await fetch("https://plugins.amankhanna.me/catalogue.json")).json();
-			}}
-		>
-			{$t("plugin_manager.elgato.load")}
-		</button>
-	{:else if !archivePlugins}
-		<h2 class="mx-2 mt-4 mb-2 text-md text-app-muted">{$t("plugin_manager.loading.elgato")}</h2>
 	{:else}
-		<div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-			{#each archivePlugins as plugin}
-				<ListedPlugin
-					icon="https://plugins.amankhanna.me/icons/{plugin.id}.png"
-					name={plugin.name}
-					subtitle={plugin.author}
-					hidden={!plugin.name.toLowerCase().includes(query.toLowerCase())}
-					action={() => installPluginElgato(plugin)}
-					actionLabel={$t("plugin_details.install")}
+		<div class="flex flex-col">
+			<div class="flex flex-row items-center mx-2 my-4 p-3 space-x-2 bg-app-warning/10 border-l-4 border-app-warning rounded">
+				<WarningCircle size="20" class="mt-0.5 text-app-warning" />
+				<div class="text-sm text-app-warning-soft">
+					{$t("plugin_manager.warning", { PRODUCT_NAME })}
+				</div>
+			</div>
+
+			{#if !plugins}
+				<h2 class="mx-2 mt-6 mb-2 text-md text-app-muted">{$t("plugin_manager.loading.open_source")}</h2>
+			{:else}
+				<div class="flex flex-row items-center ml-2 mt-6 mb-2 space-x-2">
+					<h2 class="font-semibold text-md text-app-muted">{$t("plugin_manager.open_source")}</h2>
+					<Tooltip>{$t("plugin_manager.open_source.tooltip")}</Tooltip>
+				</div>
+				<div class="flex flex-col">
+					{#each Object.entries(plugins) as [id, plugin]}
+						<ListedPlugin
+							icon="https://openactionapi.github.io/plugins/icons/{id}.png"
+							name={plugin.name}
+							subtitle={plugin.author}
+							hidden={!plugin.name.toLowerCase().includes(query.toLowerCase())}
+							action={() => (openDetailsView = id)}
+							actionLabel={$t("plugin_manager.view_details")}
+							compact
+						>
+							<svelte:fragment slot="subtitle">
+								<span>
+									{plugin.author}
+									{#if plugin.flags?.ai_assisted}
+										<Robot size="1em" class="inline align-text-bottom text-app-warning" />
+									{/if}
+								</span>
+							</svelte:fragment>
+
+							<ArrowSquareOut size="24" class="text-app-muted" />
+						</ListedPlugin>
+					{/each}
+				</div>
+			{/if}
+
+			<div class="flex flex-row items-center mt-6 mb-2">
+				<h2 class="mx-2 font-semibold text-md text-app-muted">{$t("plugin_manager.elgato")}</h2>
+				<Tooltip>{$t("plugin_manager.elgato.tooltip")}</Tooltip>
+			</div>
+			{#if !showArchive}
+				<button
+					class="ml-2 mt-2 mb-2 px-2 py-1 text-sm text-app-text bg-app-panel hover:bg-app-border transition-colors border border-app-border rounded-lg"
+					on:click={async () => {
+						showArchive = true;
+						archivePlugins = await (await fetch("https://plugins.amankhanna.me/catalogue.json")).json();
+					}}
 				>
-					<CloudArrowDown size="24" class="text-app-muted" />
-				</ListedPlugin>
-			{/each}
-		</div>
-	{/if}
+					{$t("plugin_manager.elgato.load")}
+				</button>
+			{:else if !archivePlugins}
+				<h2 class="mx-2 mt-4 mb-2 text-md text-app-muted">{$t("plugin_manager.loading.elgato")}</h2>
+			{:else}
+				<div class="flex flex-col">
+					{#each archivePlugins as plugin}
+						<ListedPlugin
+							icon="https://plugins.amankhanna.me/icons/{plugin.id}.png"
+							name={plugin.name}
+							subtitle={plugin.author}
+							hidden={!plugin.name.toLowerCase().includes(query.toLowerCase())}
+							action={() => installPluginElgato(plugin)}
+							actionLabel={$t("plugin_details.install")}
+							compact
+						>
+							<CloudArrowDown size="24" class="text-app-muted" />
+						</ListedPlugin>
+					{/each}
+				</div>
+			{/if}
 
-	{#if "Tacto Connect".toLowerCase().includes(query.toLowerCase())}
-		<div class="flex flex-row items-center mt-6 mb-2">
-			<h2 class="mx-2 font-semibold text-md text-app-muted">Tacto</h2>
-			<Tooltip>{$t("plugin_manager.tacto.tooltip")}</Tooltip>
-		</div>
-		<div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-			<ListedPlugin
-				icon="https://tacto.live/icon-192.png"
-				name="Tacto Connect"
-				subtitle="Rivulus"
-				action={() => {
-					installPluginGitHub("us.rivul.tacto", {
-						name: "Tacto Connect",
-						author: "Rivulus",
-						repository: "https://github.com/RivulusLive/tacto-desktop",
-						download_url: undefined,
-					});
-				}}
-				actionLabel={$t("plugin_details.install")}
-				secondaryAction={() => window.open("https://tacto.live")}
-				secondaryActionLabel={$t("plugin_manager.visit_website")}
-			>
-				<svelte:fragment slot="secondary">
-					<ArrowSquareOut size="24" class="text-app-muted" />
-				</svelte:fragment>
+			{#if "Tacto Connect".toLowerCase().includes(query.toLowerCase())}
+				<div class="flex flex-row items-center mt-6 mb-2">
+					<h2 class="mx-2 font-semibold text-md text-app-muted">Tacto</h2>
+					<Tooltip>{$t("plugin_manager.tacto.tooltip")}</Tooltip>
+				</div>
+				<div class="flex flex-col">
+					<ListedPlugin
+						icon="https://tacto.live/icon-192.png"
+						name="Tacto Connect"
+						subtitle="Rivulus"
+						action={() => {
+							installPluginGitHub("us.rivul.tacto", {
+								name: "Tacto Connect",
+								author: "Rivulus",
+								repository: "https://github.com/RivulusLive/tacto-desktop",
+								download_url: undefined,
+							});
+						}}
+						actionLabel={$t("plugin_details.install")}
+						compact
+						secondaryAction={() => window.open("https://tacto.live")}
+						secondaryActionLabel={$t("plugin_manager.visit_website")}
+					>
+						<svelte:fragment slot="secondary">
+							<ArrowSquareOut size="24" class="text-app-muted" />
+						</svelte:fragment>
 
-				<CloudArrowDown size="24" class="mt-2 text-app-muted" />
-			</ListedPlugin>
+						<CloudArrowDown size="24" class="mt-2 text-app-muted" />
+					</ListedPlugin>
+				</div>
+			{/if}
 		</div>
 	{/if}
 </Popup>

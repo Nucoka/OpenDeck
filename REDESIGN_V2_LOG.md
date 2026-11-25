@@ -23,3 +23,9 @@ Symbol check: the required grep matches existing `translations/ko.json` content 
 Done: grid gap is 8px with a 20px card, empty keypad cells show a dashed border and plus, selected keys get a 2px accent ring plus glow, and a footer shows `device · profile` and `Key N of M`. Inspector tabs are named Key / Action; the Key tab now has Preview, Title and Image sections with a Choose file button and the plugin-icon hint. The Actions panel is a 270px drawer with search, category chips built from real category names without duplicates, compact rows and the drag hint. Clicking an action does not assign it; only the existing drag-and-drop handler assigns actions to keys.
 
 Not verified: no GUI run, so panel behaviour, focus and visual spacing were not observed.
+
+## Step 3 - Plugins page
+
+Done: the page now has Installed / Store tabs, a single search field and an Install from file button in the header. Installed plugins render as compact rows with 36px icons, status badges with exit codes, Auto-restart toggles, Restart and Uninstall (non-builtin only). Store plugins use the same row style without status badges. Existing restart, auto-restart, uninstall, file install, catalogue and property-inspector calls are unchanged.
+
+Not verified: no GUI run, so row wrapping and tab switching were not observed.
