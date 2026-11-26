@@ -1,101 +1,125 @@
 # OpenDeck (fork)
 
-This is a fork of [nekename/OpenDeck](https://github.com/nekename/OpenDeck).
-
-Differences from upstream:
-
-- **Photo wall**: one image spread across the button grid of the current device, with a preview, Cover/Fit modes, a gap setting, and reset.
-
-This fork is built from source only; no release artifacts are published here.
-
-![Main menu](.github/readme/mainmenu.png)
-[More screenshots](#showcase)
+A fork of [OpenDeck](https://github.com/nekename/OpenDeck) by nekename: desktop software for Stream Deck-style devices, with a redesigned interface, a **Photo wall** feature, automatic config backups and a plugin watchdog.
 
 > [!NOTE]
-> Screenshots are still from the original project and will be updated.
+> This is an unofficial fork. It is not affiliated with Elgato, Mirabox or the original OpenDeck project. Bugs in the base functionality can also be reported to the [original repository](https://github.com/nekename/OpenDeck/issues); bugs in the features listed below belong in this fork's issues.
 
-OpenDeck is a desktop application for using stream controller devices like the Elgato Stream Deck on Linux, Windows, and macOS. OpenDeck supports plugins made for the original Stream Deck SDK, allowing many plugins made for the Elgato software ecosystem to be used, or the [OpenAction](https://openaction.amankhanna.me/) API.
+<!-- Replace with your own screenshots, for example in .github/readme/ -->
+![Devices](.github/readme/devices.png)
 
-Only Elgato hardware is officially supported, but plugins are available for support for other hardware vendors.
+## What is different from upstream
 
-> [!TIP]
-> No Stream Deck in front of you? Use OpenDeck with [Tacto](https://tacto.live/) to turn any smartphone into one!
+| Feature | Description |
+| --- | --- |
+| **Photo wall** | Pick one image and spread it across all keys of the device, like one big photo. |
+| **New interface** | Full redesign: sidebar navigation, Devices, Plugins, Photo wall, Settings and Profile pages, accent color and glass blur options. |
+| **Plugin watchdog** | A crashed plugin is restarted automatically. Per-plugin status and an Auto-restart toggle. |
+| **Automatic config backup** | A zip backup of your configuration is created on startup, and the latest 10 are kept. |
 
-Special thanks to [nekename](https://github.com/nekename) for creating OpenDeck, and to the developers of [Tauri](https://github.com/tauri-apps/tauri), the [elgato-streamdeck](https://github.com/OpenActionAPI/rust-elgato-streamdeck) Rust library, and [Phosphor Icons](https://phosphoricons.com/).
+Everything else (Stream Deck SDK and OpenAction plugin support, Multi Actions, Toggle Actions, profile switching, brightness control) comes from upstream OpenDeck.
 
-### Why use OpenDeck?
+## Supported devices
 
-- **Stream Deck plugins**: OpenDeck supports the majority of the Stream Deck plugins that users of the Elgato ecosystem are already familiar with, unlike other third-party softwares which are much more limited (e.g. streamdeck-ui, StreamController, Boatswain etc).
-- **Cross-platform**: OpenDeck supports Linux alongside Windows and macOS. macOS users also benefit from switching from the first-party Elgato software as OpenDeck can run plugins only built for Windows on Linux and macOS thanks to Wine. Additionally, profile files are easily moveable between platforms with no changes to them necessary.
-- **Feature-packed**: From Multi Actions and Toggle Actions to switching profiles when you switch apps and brightness control, OpenDeck has all the features you'd expect from stream controller software.
-- **Open source**: OpenDeck source code is licensed under the GNU General Public License, allowing anyone to view it and improve it for feature, stability, privacy or security reasons. [Most plugins are open-source, too.](https://marketplace.rivul.us/)
-- **Written in Rust**: The Rust programming language, which OpenDeck is built with alongside TypeScript, is known for its performance, safety and resulting code quality.
+Elgato hardware is supported by upstream OpenDeck. Other hardware works through plugins.
+
+This fork was developed and tested with a **Mirabox HSV293S** (6 columns x 3 rows, screens on the first 5 columns) using the *Ajazz AKP153 / Mirabox HSV293S* plugin. Other devices that work with upstream OpenDeck should keep working, but only the 293S has been tested.
 
 ## Photo wall
 
-Open the photo wall from the button in the top bar next to Settings. Choose an image or drop it onto the picker, then adjust the mode, gap, background colour (used by Fit), and label visibility. The preview shows how the image will be cut into the current device's button grid, with outlines marking individual buttons.
+Photo wall cuts one picture into tiles, one per key, and applies each tile as a custom image.
 
-Press Apply to write each piece to its button in order; progress is shown in the dialog. Cancel stops after the current button. Empty buttons receive a no-op tile action so the image stays continuous. Reset removes those tiles and restores the previous images, settings, and active states.
+1. Open the **Photo wall** page.
+2. Choose an image, or click one of the gradient presets.
+3. Pick a mode:
+   - **Cover** fills the whole grid and crops the overflow.
+   - **Fit** keeps the whole image and fills the rest with a background color.
+4. Set **Columns with screens**. Some devices have keys without screens (the 293S has 6 columns but screens only on 5). Set this to the number of columns that have screens so no part of the image is lost.
+5. Adjust **Gap** to match the physical bezel between the screens so the picture lines up across keys.
+6. Optionally keep **Hide labels** on so action text is not drawn over the photo.
+7. Press **Apply to deck**. Tiles are sent one by one with a short delay, with progress and a cancel option.
 
-Reset works only until the application is restarted: the previous state is kept in memory only. After a restart, restore the profile manually from a backup.
+Notes:
 
-## Support
+- Empty keys get a built-in no-op tile action so they can show part of the photo. It does nothing when pressed and is hidden from the action list.
+- **Reset** restores the previous keys, but only until the application is restarted. After a restart the old state is gone, so back up your config before the first use (see below).
+- Tiles are sent as JPEG. Large images are resized to the key resolution before sending.
+- "Apply to first N keys" is useful for a quick test on one or two keys.
 
-### How do I...?
+## Plugin watchdog
 
-To edit an action's settings, left-click on it to display its _property inspector_. To remove an action, right-click on it and choose "Delete" from the context menu.
+- Native, Node.js and Wine plugins are monitored. Webview plugins are not.
+- If a plugin process exits unexpectedly, it is restarted with increasing pauses (1, 2, 4, 8, 16 seconds), up to 5 attempts.
+- A plugin must stay up for 60 seconds before the attempt counter resets.
+- After 5 failed attempts the status becomes **Failed** and no more automatic restarts happen. The exit code is shown and written to the plugin log.
+- The **Restart** button restarts a plugin manually and resets the counter.
+- Disabling, removing or restarting a plugin yourself, and closing the app, never trigger the watchdog.
+- **Auto-restart** can be switched off per plugin. The setting is stored in `watchdog.json` in the config folder.
 
-To edit an action's appearance, right-click on it and select "Edit" from the context menu. You can then customise the image and text for each of its states. Left-click on the image to choose an image from your filesystem or right-click on the image to reset it to the plugin-provided default.
+## Automatic backups
 
-To select another device, or to switch profiles, use the dropdowns in the top right corner. You can organise profiles into folders by prefixing the profile name with the folder name and a forward slash. You can also configure automatically switching to a profile when a specific application's window is active.
+On every start the app saves a zip of your configuration (profiles, images, settings and user plugins) into the `backups` folder inside the config directory, and keeps the 10 most recent copies. Logs, temporary files and built-in plugins are not included. A failed backup never prevents the app from starting.
 
-To change other options, open Settings. From here, you can also view information about your version of OpenDeck or open the configuration and log directories. To add or remove plugins, visit the Plugins tab.
+You can also use **Back up config** and **Restore config** on the Settings page.
 
-### Troubleshooting
+Config folder on Windows: `%appdata%\opendeck\`
+Logs: `%appdata%\opendeck\logs\`
 
-- Ensure you are running the latest version of OpenDeck, as well as recent versions of related software (e.g. Spotify or OBS).
-- Check the [FAQ](https://github.com/nekename/OpenDeck/wiki/0.-FAQ) and [GitHub Issues](https://github.com/nekename/OpenDeck/issues) to see if there's a fix for your problem already.
-- Check the OpenDeck log file for any important messages. This file should be included with any support request.
-  - You can also run OpenDeck from the terminal to see the logs directly if it's easier than finding the log file or if the log file is empty or missing details.
-  - For issues with plugins, you can also check the plugin's logs (in the same folder, sometimes as well as a file named `plugin.log` or similar in the plugin's own folder).
-  - The log directory can be opened from the settings page of OpenDeck, or alternatively located manually at the paths below:
-    - Linux: `~/.local/share/opendeck/logs/`
-    - Flatpak: `~/.var/app/me.amankhanna.opendeck/data/opendeck/logs/`
-    - Windows: `%appdata%\opendeck\logs\`
-    - macOS: `~/Library/Logs/opendeck/`
-- When trying to run compiled plugins built for Windows on Linux or macOS, please ensure you have the latest version of Wine (and Wine Mono) installed on your system.
-- If your device isn't showing up, ensure you have the correct permissions to access it (e.g. on Linux, installing udev subsystem rules and restarting your system), and that you have restarted OpenDeck since connecting it.
+## Installation
 
-### Support forums
+Download the installer (`.exe` or `.msi`) from the [Releases page](https://github.com/Nucoka/OpenDeck/releases).
 
-- [Discord](https://discord.gg/26Nf8rHvaj)
-- [Matrix](https://matrix.to/#/#opendeck:matrix.org)
-- [GitHub Issues](https://github.com/nekename/OpenDeck/issues)
+> [!WARNING]
+> The installer is not code-signed, so Windows SmartScreen may show an "unknown publisher" warning. Click **More info**, then **Run anyway**.
+
+Before the first run, close the original OpenDeck if it is installed: two instances cannot control the same device. If you already use OpenDeck, copy `%appdata%\opendeck` somewhere safe first.
+
+Only Windows has been tested. Linux and macOS builds should be possible from source, as with upstream, but are untested in this fork.
 
 ## Building from source
 
-> [!TIP]
-> The development guide for agents present in [AGENTS.md](AGENTS.md) also serves as a useful introduction to the codebase for humans.
+Prerequisites:
 
-You'll need to ensure that all of the [prerequisites for building a Tauri application](https://tauri.app/start/prerequisites) are satisfied to build OpenDeck, as well as making sure that [Deno](https://deno.com/) is installed. On Linux, you'll also need `libudev` and `libdbus` installed for your distribution. After running `deno install`, you can use `deno task tauri dev` and `deno task tauri build` to work with OpenDeck.
+- [Tauri prerequisites](https://tauri.app/start/prerequisites) (on Windows: Microsoft C++ Build Tools with "Desktop development with C++", and WebView2)
+- [Rust](https://rustup.rs/)
+- [Deno](https://deno.com/)
+- Git
 
-Before each commit, please ensure that all of the following are completed:
+```bash
+git clone https://github.com/Nucoka/OpenDeck
+cd OpenDeck
+deno install
+deno task tauri dev      # development mode
+deno task tauri build    # release build, output in src-tauri/target/release/bundle
+```
 
-1. Rust code has been linted using `cargo clippy` and it discovers no violations
-2. Rust code has been formatted using `cargo fmt`
-3. TypeScript code has been checked using `deno check` and linted using `deno lint` and they discover no violations
-4. Svelte code has been linted using `deno task check` and it discovers no violations
-5. Frontend code has been formatted using `deno task format`
+The first Rust build takes a while.
 
-When submitting contributions, please adhere to the [Conventional Commits specification](https://conventionalcommits.org/) for commit messages. You will also need to [sign your commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits). Feel free to reach out on the support channels above for guidance when contributing!
+If `cargo` fails with "access denied" on `opendeck.exe`, an old instance is still running. Close it (including the tray icon) or run `taskkill /F /IM opendeck.exe`.
 
-## License
+Before committing, run `cargo clippy`, `cargo fmt`, `deno task check` and `deno task format`, as in upstream. [AGENTS.md](AGENTS.md) describes the codebase structure, including the files added by this fork:
 
-OpenDeck is licensed under the GNU General Public License version 3.0 or later. For more details, see the LICENSE.md file.
+- `src/lib/photoWall.ts` and `src/components/PhotoWall.svelte`: image slicing and the Photo wall page
+- `photo_wall_apply_tile` command and the `opendeck.photowalltile` built-in action
+- `src-tauri/src/backup.rs`: startup backups
+- `src-tauri/src/plugins/watchdog.rs`: plugin watchdog
 
-## Showcase
+## Troubleshooting
 
-![Main menu](.github/readme/mainmenu.png)
-![Multi action](.github/readme/multiaction.png)
-![Plugins](.github/readme/plugins.png)
-![Profiles](.github/readme/profiles.png)
+- Your device does not appear: make sure the matching plugin for your hardware is installed and running (Plugins page), and restart OpenDeck after connecting the device.
+- Check the logs in `%appdata%\opendeck\logs\` (also available via **Open logs** in Settings). Include them when reporting an issue.
+- A plugin keeps crashing: look at its status and exit code on the Plugins page and at its log file in the logs folder.
+- Photo wall pieces do not line up with the screens: adjust **Gap** and **Columns with screens**, then apply again.
+- General questions and base-feature problems: see the upstream [FAQ](https://github.com/nekename/OpenDeck/wiki/0.-FAQ) and [issues](https://github.com/nekename/OpenDeck/issues).
+
+## Known limitations
+
+- Photo wall **Reset** works only until the app is restarted.
+- Sending images to some devices is slow, so applying to all keys takes a few seconds.
+- Only the Mirabox HSV293S and Windows have been tested.
+
+## Credits and license
+
+This project is a fork of [OpenDeck](https://github.com/nekename/OpenDeck) by [nekename](https://github.com/nekename). Many thanks to the author and to the developers of [Tauri](https://github.com/tauri-apps/tauri), the [elgato-streamdeck](https://github.com/OpenActionAPI/rust-elgato-streamdeck) library, and [Phosphor Icons](https://phosphoricons.com/). If you like OpenDeck itself, consider supporting the original author.
+
+Licensed under the GNU General Public License version 3.0 or later, the same as upstream. See [LICENSE.md](LICENSE.md). This fork modifies the original source code; all changes are available in this repository's history.
