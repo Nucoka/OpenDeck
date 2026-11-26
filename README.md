@@ -7,6 +7,9 @@ A fork of [OpenDeck](https://github.com/nekename/OpenDeck) by nekename: desktop 
 
 <!-- Replace with your own screenshots, for example in .github/readme/ -->
 ![Devices](.github/readme/devices.png)
+![Photo wall](.github/readme/photowall.png)
+![Plugins](.github/readme/plugins.png)
+![Settings](.github/readme/settings.png)
 
 ## What is different from upstream
 
